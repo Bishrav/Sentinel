@@ -73,3 +73,16 @@ class ThreatGraphSnapshot(BaseModel):
     nodes: tuple[GraphNode, ...] = ()
     edges: tuple[GraphEdge, ...] = ()
     schema_version: Literal["1.0"] = "1.0"
+
+
+class ReachabilityResult(BaseModel):
+    """Deterministic result of a directed graph traversal."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    source_node_id: str = Field(min_length=1)
+    reachable_node_ids: tuple[str, ...] = ()
+    visited_node_ids: tuple[str, ...] = ()
+    depth_by_node_id: dict[str, int] = Field(default_factory=dict)
+    algorithm: Literal["bfs", "dfs"]
+    edge_types: tuple[EdgeType, ...] | None = None
