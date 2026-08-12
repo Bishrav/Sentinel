@@ -5,6 +5,7 @@ description = "Security telemetry correlation and threat intelligence engine."
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115,<1.0",
+    "pydantic>=2.10,<3.0",
     "pydantic-settings>=2.6,<3.0",
     "uvicorn[standard]>=0.34,<1.0",
 ]
@@ -29,8 +30,9 @@ select = ["E", "F", "I", "B", "UP"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--strict-markers --strict-config"
+pythonpath = ["services/api/src", "services/ingestion/src"]
 
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["services/api/src"]
+files = ["services/api/src", "services/ingestion/src"]

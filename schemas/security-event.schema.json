@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sentinel.security/schemas/security-event/v1",
+  "title": "SecurityEvent",
+  "description": "Canonical Sentinel telemetry event contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "timestamp",
+    "actor_id",
+    "actor_type",
+    "action",
+    "resource",
+    "result",
+    "attributes",
+    "severity",
+    "source",
+    "schema_version"
+  ],
+  "properties": {
+    "event_id": {"type": "string", "format": "uuid"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "actor_id": {"type": "string", "minLength": 1},
+    "actor_type": {"type": "string", "enum": ["user", "service_account", "api_client", "device", "unknown"]},
+    "source_ip": {"type": ["string", "null"]},
+    "device_id": {"type": ["string", "null"]},
+    "action": {"type": "string", "minLength": 1},
+    "resource": {"type": "string", "minLength": 1},
+    "result": {"type": "string", "enum": ["success", "failure", "unknown"]},
+    "attributes": {"type": "object", "additionalProperties": true},
+    "severity": {"type": "string", "enum": ["low", "medium", "high", "critical"]},
+    "source": {"type": "string", "minLength": 1},
+    "schema_version": {"type": "string", "const": "1.0"}
+  }
+}
