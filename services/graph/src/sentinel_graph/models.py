@@ -86,3 +86,17 @@ class ReachabilityResult(BaseModel):
     depth_by_node_id: dict[str, int] = Field(default_factory=dict)
     algorithm: Literal["bfs", "dfs"]
     edge_types: tuple[EdgeType, ...] | None = None
+
+
+class ShortestPathResult(BaseModel):
+    """Confidence-weighted directed path between two graph nodes."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    source_node_id: str = Field(min_length=1)
+    target_node_id: str = Field(min_length=1)
+    node_ids: tuple[str, ...] = ()
+    edge_ids: tuple[str, ...] = ()
+    total_cost: float = Field(ge=0.0)
+    edge_types: tuple[EdgeType, ...] | None = None
+    algorithm: Literal["dijkstra"] = "dijkstra"
