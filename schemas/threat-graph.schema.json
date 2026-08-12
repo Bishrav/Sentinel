@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sentinel.security/schemas/threat-graph/v1",
+  "title": "ThreatGraphSnapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_id", "created_at", "nodes", "edges", "schema_version"],
+  "properties": {
+    "snapshot_id": {"type": "string", "format": "uuid"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "schema_version": {"type": "string", "const": "1.0"},
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["node_id", "node_type", "label", "properties", "criticality"],
+        "properties": {
+          "node_id": {"type": "string", "minLength": 1},
+          "node_type": {"type": "string", "enum": ["user", "credential", "device", "ip", "role", "permission", "api", "service", "container", "database", "table", "secret", "repository"]},
+          "label": {"type": "string", "minLength": 1},
+          "properties": {"type": "object"},
+          "criticality": {"type": "integer", "minimum": 0, "maximum": 100}
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["edge_id", "edge_type", "source_node_id", "target_node_id", "properties", "observed_at", "confidence"],
+        "properties": {
+          "edge_id": {"type": "string", "minLength": 1},
+          "edge_type": {"type": "string", "enum": ["logged_in_from", "has_role", "grants", "calls", "accessed", "deployed_on", "can_reach", "owns", "reads", "writes", "exposed_to"]},
+          "source_node_id": {"type": "string", "minLength": 1},
+          "target_node_id": {"type": "string", "minLength": 1},
+          "properties": {"type": "object"},
+          "observed_at": {"type": "string", "format": "date-time"},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    }
+  }
+}
