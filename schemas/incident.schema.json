@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sentinel.security/schemas/incident/v1",
+  "title": "Incident",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["incident_id", "fingerprint", "status", "first_seen", "last_seen", "severity", "match_count", "schema_version"],
+  "properties": {
+    "incident_id": {"type": "string", "format": "uuid"},
+    "fingerprint": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "enum": ["open", "acknowledged", "closed"]},
+    "first_seen": {"type": "string", "format": "date-time"},
+    "last_seen": {"type": "string", "format": "date-time"},
+    "severity": {"type": "string", "enum": ["low", "medium", "high", "critical"]},
+    "rule_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "event_ids": {"type": "array", "items": {"type": "string", "format": "uuid"}},
+    "actor_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "resources": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "match_count": {"type": "integer", "minimum": 0},
+    "evidence": {"type": "array", "items": {"type": "object"}},
+    "schema_version": {"type": "string", "const": "1.0"}
+  }
+}
