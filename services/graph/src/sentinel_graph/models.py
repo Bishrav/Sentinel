@@ -141,3 +141,24 @@ class CentralityResult(BaseModel):
 
     scores: tuple[CentralityScore, ...] = ()
     edge_types: tuple[EdgeType, ...] | None = None
+
+
+class StronglyConnectedComponent(BaseModel):
+    """One deterministic strongly connected graph component."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    node_ids: tuple[str, ...] = ()
+    internal_edge_ids: tuple[str, ...] = ()
+    is_cycle: bool
+    contains_privilege_edge: bool
+
+
+class StronglyConnectedComponentsResult(BaseModel):
+    """SCC analysis and privilege-loop projection."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    components: tuple[StronglyConnectedComponent, ...] = ()
+    privilege_loops: tuple[StronglyConnectedComponent, ...] = ()
+    edge_types: tuple[EdgeType, ...] | None = None
