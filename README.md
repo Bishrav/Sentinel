@@ -18,7 +18,7 @@ The project is part of a broader AI/backend portfolio, but Sentinel has a distin
 
 ## Project status
 
-Sentinel is currently in the architecture and foundation phase. The repository starts with the system contract and implementation roadmap; production claims will be added only as they are supported by tests, replayable datasets, benchmarks, and documented failure modes.
+Sentinel is currently in active implementation. The repository starts with the system contract and implementation roadmap; production claims will be added only as they are supported by tests, replayable datasets, benchmarks, and documented failure modes.
 
 Planned evidence includes:
 
@@ -138,7 +138,8 @@ Technology choices may change as benchmarks and operational constraints provide 
 - [x] Define schemas, repository boundaries, and local development environment
 - [x] Build collectors, normalization, Kafka transport, and replayable fixtures
 - [x] Implement rule detection and incident aggregation
-- [ ] Add threat graph ingestion, reachability, and attack-path queries
+- [x] Add threat graph ingestion, reachability, and attack-path queries
+- [x] Add centrality, privilege-loop detection, and permission graph diffs
 - [ ] Add entity baselines and behavioral anomaly evaluation
 - [ ] Implement FSM/sliding-window sequence correlation
 - [ ] Add evidence-weighted risk scoring and audit records
