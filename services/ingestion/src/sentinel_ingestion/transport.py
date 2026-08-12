@@ -33,7 +33,7 @@ class KafkaEventPublisher:
     """Publish canonical events to a Kafka-compatible topic."""
 
     def __init__(self, *, bootstrap_servers: str, topic: str) -> None:
-        from confluent_kafka import Producer
+        from confluent_kafka import Producer  # type: ignore[import-untyped]
 
         self.topic = topic
         self._producer = Producer({"bootstrap.servers": bootstrap_servers})
@@ -49,4 +49,4 @@ class KafkaEventPublisher:
     def flush(self, timeout: float = 10.0) -> int:
         """Wait for buffered messages and return the number still queued."""
 
-        return self._producer.flush(timeout)
+        return self._producer.flush(timeout)  # type: ignore[no-any-return]

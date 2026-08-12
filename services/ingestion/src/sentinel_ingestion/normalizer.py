@@ -66,7 +66,9 @@ def normalize(raw: Mapping[str, Any], *, source: str) -> SecurityEvent:
     making ingestion idempotent when the same record is replayed.
     """
 
-    action = str(_first(raw, "action", "event_action", "operation", default="unknown")).strip().lower()
+    action = str(
+        _first(raw, "action", "event_action", "operation", default="unknown")
+    ).strip().lower()
     result = _result(_first(raw, "result", "status", "outcome", default="unknown"))
     canonical = json.dumps({"source": source, "record": raw}, sort_keys=True, default=str)
     event_id = _first(raw, "event_id", "id", default=None)
