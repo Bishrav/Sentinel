@@ -162,3 +162,17 @@ class StronglyConnectedComponentsResult(BaseModel):
     components: tuple[StronglyConnectedComponent, ...] = ()
     privilege_loops: tuple[StronglyConnectedComponent, ...] = ()
     edge_types: tuple[EdgeType, ...] | None = None
+
+
+class GraphDiffResult(BaseModel):
+    """Deterministic difference between two threat graph snapshots."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    added_node_ids: tuple[str, ...] = ()
+    removed_node_ids: tuple[str, ...] = ()
+    added_edge_ids: tuple[str, ...] = ()
+    removed_edge_ids: tuple[str, ...] = ()
+    changed_edge_ids: tuple[str, ...] = ()
+    newly_exposed_edge_ids: tuple[str, ...] = ()
+    newly_exposed_node_ids: tuple[str, ...] = ()
