@@ -137,7 +137,7 @@ Technology choices may change as benchmarks and operational constraints provide 
 
 - [x] Define schemas, repository boundaries, and local development environment
 - [x] Build collectors, normalization, Kafka transport, and replayable fixtures
-- [ ] Implement rule detection and incident aggregation
+- [x] Implement rule detection and incident aggregation
 - [ ] Add threat graph ingestion, reachability, and attack-path queries
 - [ ] Add entity baselines and behavioral anomaly evaluation
 - [ ] Implement FSM/sliding-window sequence correlation

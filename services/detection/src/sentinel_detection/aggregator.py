@@ -46,8 +46,12 @@ class IncidentAggregator:
                     evidence=(match.evidence,),
                 )
             else:
-                event_ids = incident.event_ids + ((match.event_id,) if match.event_id not in incident.event_ids else ())
-                evidence = incident.evidence + ((match.evidence,) if match.evidence not in incident.evidence else ())
+                event_ids = incident.event_ids + (
+                    (match.event_id,) if match.event_id not in incident.event_ids else ()
+                )
+                evidence = incident.evidence + (
+                    (match.evidence,) if match.evidence not in incident.evidence else ()
+                )
                 incident = incident.model_copy(
                     update={
                         "last_seen": max(incident.last_seen, match.matched_at),

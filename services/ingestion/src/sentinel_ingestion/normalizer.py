@@ -27,7 +27,11 @@ def _actor_type(value: Any) -> ActorType:
     normalized = str(value or "unknown").strip().lower().replace("-", "_")
     aliases = {"service": "service_account", "api": "api_client"}
     candidate = aliases.get(normalized, normalized)
-    return candidate if candidate in {"user", "service_account", "api_client", "device"} else "unknown"
+    return (
+        candidate
+        if candidate in {"user", "service_account", "api_client", "device"}
+        else "unknown"
+    )
 
 
 def _result(value: Any) -> EventResult:

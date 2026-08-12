@@ -43,15 +43,27 @@ def _compare(condition: RuleCondition, actual: Any) -> bool:
     if condition.operator == "neq":
         return actual != expected
     if condition.operator == "in":
-        return isinstance(expected, Collection) and not isinstance(expected, (str, bytes)) and actual in expected
+        return (
+            isinstance(expected, Collection)
+            and not isinstance(expected, (str, bytes))
+            and actual in expected
+        )
     if condition.operator == "not_in":
-        return isinstance(expected, Collection) and not isinstance(expected, (str, bytes)) and actual not in expected
+        return (
+            isinstance(expected, Collection)
+            and not isinstance(expected, (str, bytes))
+            and actual not in expected
+        )
     if condition.operator == "contains":
         if isinstance(actual, (str, bytes, Collection)):
             return expected in actual
         return False
     if condition.operator == "regex":
-        return isinstance(actual, str) and isinstance(expected, str) and re.search(expected, actual) is not None
+        return (
+            isinstance(actual, str)
+            and isinstance(expected, str)
+            and re.search(expected, actual) is not None
+        )
     try:
         if condition.operator == "gt":
             return actual > expected
@@ -78,7 +90,10 @@ class RuleEngine:
         for rule in self._rules:
             if not rule.enabled:
                 continue
-            results = [_compare(condition, _resolve(data, condition.field)) for condition in rule.conditions]
+            results = [
+                _compare(condition, _resolve(data, condition.field))
+                for condition in rule.conditions
+            ]
             matched = all(results) if rule.match_mode == "all" else any(results)
             if not matched:
                 continue
