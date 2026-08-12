@@ -1,0 +1,36 @@
+[project]
+name = "sentinel-security-intelligence"
+version = "0.1.0"
+description = "Security telemetry correlation and threat intelligence engine."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "pydantic-settings>=2.6,<3.0",
+    "uvicorn[standard]>=0.34,<1.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28,<1.0",
+    "mypy>=1.15,<2.0",
+    "pytest>=8.3,<9.0",
+    "pytest-cov>=6.0,<7.0",
+    "ruff>=0.9,<1.0",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["services/api/src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers --strict-config"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["services/api/src"]

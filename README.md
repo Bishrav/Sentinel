@@ -135,7 +135,7 @@ Technology choices may change as benchmarks and operational constraints provide 
 
 ## Roadmap
 
-- [ ] Define schemas, repository boundaries, and local development environment
+- [x] Define schemas, repository boundaries, and local development environment
 - [ ] Build collectors, normalization, Kafka transport, and replayable fixtures
 - [ ] Implement rule detection and incident aggregation
 - [ ] Add threat graph ingestion, reachability, and attack-path queries
