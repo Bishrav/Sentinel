@@ -120,3 +120,24 @@ class AttackPathAssessment(BaseModel):
     privilege_component: float = Field(ge=0.0)
     confidence_component: float = Field(ge=0.0)
     risk_score: float = Field(ge=0.0, le=100.0)
+
+
+class CentralityScore(BaseModel):
+    """Degree-centrality measures for one graph node."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    node_id: str = Field(min_length=1)
+    in_degree: int = Field(ge=0)
+    out_degree: int = Field(ge=0)
+    total_degree: int = Field(ge=0)
+    normalized_score: float = Field(ge=0.0, le=1.0)
+
+
+class CentralityResult(BaseModel):
+    """Stable degree-centrality projection for a graph snapshot."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    scores: tuple[CentralityScore, ...] = ()
+    edge_types: tuple[EdgeType, ...] | None = None
