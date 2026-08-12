@@ -100,3 +100,23 @@ class ShortestPathResult(BaseModel):
     total_cost: float = Field(ge=0.0)
     edge_types: tuple[EdgeType, ...] | None = None
     algorithm: Literal["dijkstra"] = "dijkstra"
+
+
+class AttackPathAssessment(BaseModel):
+    """Explainable heuristic risk assessment for a candidate attack path."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    source_node_id: str = Field(min_length=1)
+    target_node_id: str = Field(min_length=1)
+    path_exists: bool
+    node_ids: tuple[str, ...] = ()
+    edge_ids: tuple[str, ...] = ()
+    edge_types: tuple[EdgeType, ...] = ()
+    total_cost: float | None = Field(default=None, ge=0.0)
+    target_criticality: int = Field(ge=0, le=100)
+    privilege_edge_count: int = Field(default=0, ge=0)
+    criticality_component: float = Field(ge=0.0)
+    privilege_component: float = Field(ge=0.0)
+    confidence_component: float = Field(ge=0.0)
+    risk_score: float = Field(ge=0.0, le=100.0)
