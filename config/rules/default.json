@@ -1,0 +1,37 @@
+[
+  {
+    "rule_id": "failed_login",
+    "version": 1,
+    "name": "Failed authentication",
+    "description": "Detect a failed login attempt for incident aggregation.",
+    "severity": "medium",
+    "tags": ["authentication", "credential-abuse"],
+    "conditions": [
+      {"field": "action", "operator": "eq", "value": "login"},
+      {"field": "result", "operator": "eq", "value": "failure"}
+    ]
+  },
+  {
+    "rule_id": "privilege_change",
+    "version": 1,
+    "name": "Privilege change",
+    "description": "Detect a role or permission change.",
+    "severity": "high",
+    "tags": ["identity", "privilege"],
+    "conditions": [
+      {"field": "action", "operator": "in", "value": ["role_change", "grant_permission", "revoke_permission"]}
+    ]
+  },
+  {
+    "rule_id": "large_export",
+    "version": 1,
+    "name": "Large data export",
+    "description": "Detect an export larger than ten megabytes.",
+    "severity": "high",
+    "tags": ["data-exposure", "exfiltration"],
+    "conditions": [
+      {"field": "action", "operator": "eq", "value": "export"},
+      {"field": "attributes.bytes", "operator": "gte", "value": 10485760}
+    ]
+  }
+]

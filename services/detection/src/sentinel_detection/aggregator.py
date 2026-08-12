@@ -1,0 +1,71 @@
+"""Replay-safe in-memory incident aggregation."""
+
+from __future__ import annotations
+
+from collections.abc import Iterable
+from uuid import NAMESPACE_URL, UUID, uuid5
+
+from sentinel_ingestion.models import SecurityEvent
+
+from .models import Incident, RuleMatch, Severity
+
+_SEVERITY_RANK: dict[Severity, int] = {"low": 0, "medium": 1, "high": 2, "critical": 3}
+
+
+def _max_severity(left: Severity, right: Severity) -> Severity:
+    return left if _SEVERITY_RANK[left] >= _SEVERITY_RANK[right] else right
+
+
+class IncidentAggregator:
+    """Group rule matches by fingerprint while deduplicating event replays."""
+
+    def __init__(self) -> None:
+        self._incidents: dict[str, Incident] = {}
+        self._processed_matches: set[tuple[str, UUID]] = set()
+
+    def add(self, event: SecurityEvent, matches: Iterable[RuleMatch]) -> tuple[Incident, ...]:
+        changed: list[Incident] = []
+        for match in matches:
+            match_key = (match.rule_id, match.event_id)
+            if match_key in self._processed_matches:
+                continue
+            self._processed_matches.add(match_key)
+            incident = self._incidents.get(match.fingerprint)
+            if incident is None:
+                incident = Incident(
+                    incident_id=uuid5(NAMESPACE_URL, f"sentinel:incident:{match.fingerprint}"),
+                    fingerprint=match.fingerprint,
+                    first_seen=match.matched_at,
+                    last_seen=match.matched_at,
+                    severity=match.severity,
+                    rule_ids=frozenset({match.rule_id}),
+                    event_ids=(match.event_id,),
+                    actor_ids=frozenset({event.actor_id}),
+                    resources=frozenset({event.resource}),
+                    match_count=1,
+                    evidence=(match.evidence,),
+                )
+            else:
+                event_ids = incident.event_ids + ((match.event_id,) if match.event_id not in incident.event_ids else ())
+                evidence = incident.evidence + ((match.evidence,) if match.evidence not in incident.evidence else ())
+                incident = incident.model_copy(
+                    update={
+                        "last_seen": max(incident.last_seen, match.matched_at),
+                        "severity": _max_severity(incident.severity, match.severity),
+                        "rule_ids": incident.rule_ids | {match.rule_id},
+                        "event_ids": event_ids,
+                        "actor_ids": incident.actor_ids | {event.actor_id},
+                        "resources": incident.resources | {event.resource},
+                        "match_count": incident.match_count + 1,
+                        "evidence": evidence,
+                    }
+                )
+            self._incidents[match.fingerprint] = incident
+            changed.append(incident)
+        return tuple(changed)
+
+    def get(self, fingerprint: str) -> Incident | None:
+        return self._incidents.get(fingerprint)
+
+    def all(self) -> tuple[Incident, ...]:
+        return tuple(self._incidents.values())
