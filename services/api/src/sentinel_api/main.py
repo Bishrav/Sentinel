@@ -12,6 +12,7 @@ from sentinel_ml.baselines import BaselineRegistry
 from sentinel_ml.metrics import AnomalyMetrics
 from sentinel_ml.models import AnomalyScore, BehavioralFeatureVector, EntityBaseline
 from sentinel_ml.scoring import score_vector
+from sentinel_sequence.metrics import default_metrics as sequence_metrics
 
 
 class AnomalyScoreRequest(BaseModel):
@@ -113,4 +114,4 @@ async def score_registered_anomaly(
 async def metrics() -> str:
     """Return Prometheus-compatible ML scoring metrics."""
 
-    return ml_metrics.prometheus()
+    return ml_metrics.prometheus() + sequence_metrics.prometheus()

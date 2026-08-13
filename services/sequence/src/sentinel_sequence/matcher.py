@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from collections import deque
 from datetime import datetime, timedelta
+from time import perf_counter
 from uuid import UUID
 
 from sentinel_detection.engine import RuleEngine
@@ -12,6 +13,7 @@ from sentinel_detection.models import DetectionRule
 from sentinel_ingestion.models import SecurityEvent
 
 from .models import SequenceMatch, SequenceSignature, SequenceStep
+from .metrics import SequenceMetrics, default_metrics
 
 
 @dataclass(frozen=True)
@@ -32,12 +34,14 @@ class FiniteStateSequenceMatcher:
         *,
         max_active_per_actor: int = 1000,
         max_processed_event_ids: int = 10_000,
+        metrics: SequenceMetrics | None = None,
     ) -> None:
         if max_active_per_actor < 1 or max_processed_event_ids < 1:
             raise ValueError("state bounds must be positive")
         self._signatures = tuple(signature for signature in signatures if signature.enabled)
         self._max_active_per_actor = max_active_per_actor
         self._max_processed_event_ids = max_processed_event_ids
+        self.metrics = metrics or default_metrics
         self._partials: dict[tuple[str, str], list[_PartialMatch]] = {}
         self._processed_event_ids: set[UUID] = set()
         self._processed_event_order: deque[UUID] = deque()
@@ -62,7 +66,9 @@ class FiniteStateSequenceMatcher:
         """Consume one event and return any sequences completed by it."""
 
         if event.event_id in self._processed_event_ids:
+            self.metrics.observe_duplicate()
             return ()
+        started = perf_counter()
         self._processed_event_ids.add(event.event_id)
         self._processed_event_order.append(event.event_id)
         if len(self._processed_event_order) > self._max_processed_event_ids:
@@ -70,12 +76,14 @@ class FiniteStateSequenceMatcher:
         if self._max_seen_at is None or event.timestamp > self._max_seen_at:
             self._max_seen_at = event.timestamp
 
-        self._evict_expired()
+        evicted = self._evict_expired()
 
         matches: list[SequenceMatch] = []
+        late_for_signature = False
         for signature in self._signatures:
             watermark = self._watermark(signature)
             if event.timestamp < watermark:
+                late_for_signature = True
                 continue
             key = (signature.signature_id, event.actor_id)
             active = self._partials.get(key, [])
@@ -131,6 +139,13 @@ class FiniteStateSequenceMatcher:
                 self._partials.pop(key, None)
 
         self._enforce_actor_bound(event.actor_id)
+        self.metrics.observe(
+            latency_ms=(perf_counter() - started) * 1000,
+            completed=len(matches),
+            late=late_for_signature,
+            evicted=evicted,
+            active_states=self.active_state_count,
+        )
 
         return tuple(matches)
 
@@ -151,9 +166,10 @@ class FiniteStateSequenceMatcher:
             raise RuntimeError("watermark requested before any event")
         return self._max_seen_at - timedelta(seconds=signature.allowed_lateness_seconds)
 
-    def _evict_expired(self) -> None:
+    def _evict_expired(self) -> int:
         if self._max_seen_at is None:
-            return
+            return 0
+        evicted = 0
         for signature in self._signatures:
             watermark = self._watermark(signature)
             for key in [key for key in self._partials if key[0] == signature.signature_id]:
@@ -162,10 +178,12 @@ class FiniteStateSequenceMatcher:
                     for partial in self._partials[key]
                     if watermark - partial.started_at <= timedelta(seconds=signature.window_seconds)
                 ]
+                evicted += len(self._partials[key]) - len(retained)
                 if retained:
                     self._partials[key] = retained
                 else:
                     self._partials.pop(key, None)
+        return evicted
 
     def _enforce_actor_bound(self, actor_id: str) -> None:
         entries = [
