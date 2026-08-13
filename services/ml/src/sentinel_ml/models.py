@@ -88,3 +88,28 @@ class EstimatorAnomalyScore(BaseModel):
     is_anomalous: bool
     estimator: Literal["isolation_forest"]
     metadata: EstimatorMetadata
+
+
+class LabeledFeatureVector(BaseModel):
+    """Evaluation sample with a known benign/anomalous label."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    vector: BehavioralFeatureVector
+    is_anomalous: bool
+
+
+class EvaluationMetrics(BaseModel):
+    """Binary anomaly-detection metrics and confusion counts."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    estimator_name: str = Field(min_length=1)
+    sample_count: int = Field(ge=0)
+    true_positives: int = Field(ge=0)
+    true_negatives: int = Field(ge=0)
+    false_positives: int = Field(ge=0)
+    false_negatives: int = Field(ge=0)
+    precision: float = Field(ge=0.0, le=1.0)
+    recall: float = Field(ge=0.0, le=1.0)
+    f1: float = Field(ge=0.0, le=1.0)
