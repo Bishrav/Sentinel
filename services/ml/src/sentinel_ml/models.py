@@ -122,3 +122,14 @@ class ModelComparison(BaseModel):
 
     results: tuple[EvaluationMetrics, ...] = ()
     best_by_f1: str | None = None
+
+
+class EvaluationRun(BaseModel):
+    """Result of running the labeled fixture through available detectors."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    training_sample_count: int = Field(ge=0)
+    evaluation_sample_count: int = Field(ge=0)
+    comparison: ModelComparison
+    skipped_estimators: tuple[str, ...] = ()
