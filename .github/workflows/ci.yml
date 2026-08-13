@@ -21,3 +21,17 @@ jobs:
       - run: uv run ruff format --check .
       - run: uv run mypy
       - run: uv run pytest --cov=services/api/src --cov-report=term-missing
+      - name: Validate sequence correlation
+        run: >-
+          uv run pytest
+          tests/contract/test_sequence_contract.py
+          tests/unit/test_sequence_loader.py
+          tests/unit/test_sequence_matcher.py
+          tests/unit/test_sequence_metrics.py
+          tests/integration/test_configured_pipeline.py
+          tests/integration/test_sequence_replay.py
+      - name: Run sequence benchmark smoke check
+        run: >-
+          uv run python -c
+          "from benchmarks.sequence_benchmark import run_benchmark; result = run_benchmark(200);
+          assert result['completed_matches'] == 100 and result['events_per_second'] > 0"
