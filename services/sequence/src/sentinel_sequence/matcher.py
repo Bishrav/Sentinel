@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from collections import deque
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from sentinel_detection.engine import RuleEngine
@@ -23,12 +24,24 @@ class _PartialMatch:
 
 
 class FiniteStateSequenceMatcher:
-    """Match enabled signatures while keeping state isolated per actor."""
+    """Match signatures with event-time lateness and bounded in-memory state."""
 
-    def __init__(self, signatures: tuple[SequenceSignature, ...]) -> None:
+    def __init__(
+        self,
+        signatures: tuple[SequenceSignature, ...],
+        *,
+        max_active_per_actor: int = 1000,
+        max_processed_event_ids: int = 10_000,
+    ) -> None:
+        if max_active_per_actor < 1 or max_processed_event_ids < 1:
+            raise ValueError("state bounds must be positive")
         self._signatures = tuple(signature for signature in signatures if signature.enabled)
+        self._max_active_per_actor = max_active_per_actor
+        self._max_processed_event_ids = max_processed_event_ids
         self._partials: dict[tuple[str, str], list[_PartialMatch]] = {}
         self._processed_event_ids: set[UUID] = set()
+        self._processed_event_order: deque[UUID] = deque()
+        self._max_seen_at: datetime | None = None
         self._step_engines = {
             (signature.signature_id, step.step_id): RuleEngine(
                 [
@@ -51,9 +64,19 @@ class FiniteStateSequenceMatcher:
         if event.event_id in self._processed_event_ids:
             return ()
         self._processed_event_ids.add(event.event_id)
+        self._processed_event_order.append(event.event_id)
+        if len(self._processed_event_order) > self._max_processed_event_ids:
+            self._processed_event_ids.remove(self._processed_event_order.popleft())
+        if self._max_seen_at is None or event.timestamp > self._max_seen_at:
+            self._max_seen_at = event.timestamp
+
+        self._evict_expired()
 
         matches: list[SequenceMatch] = []
         for signature in self._signatures:
+            watermark = self._watermark(signature)
+            if event.timestamp < watermark:
+                continue
             key = (signature.signature_id, event.actor_id)
             active = self._partials.get(key, [])
             retained: list[_PartialMatch] = []
@@ -107,7 +130,66 @@ class FiniteStateSequenceMatcher:
             else:
                 self._partials.pop(key, None)
 
+        self._enforce_actor_bound(event.actor_id)
+
         return tuple(matches)
+
+    @property
+    def watermark(self) -> datetime | None:
+        """Return the highest observed event time, before signature lateness offsets."""
+
+        return self._max_seen_at
+
+    @property
+    def active_state_count(self) -> int:
+        """Return the number of currently retained partial sequence matches."""
+
+        return sum(len(partials) for partials in self._partials.values())
+
+    def _watermark(self, signature: SequenceSignature) -> datetime:
+        if self._max_seen_at is None:
+            raise RuntimeError("watermark requested before any event")
+        return self._max_seen_at - timedelta(seconds=signature.allowed_lateness_seconds)
+
+    def _evict_expired(self) -> None:
+        if self._max_seen_at is None:
+            return
+        for signature in self._signatures:
+            watermark = self._watermark(signature)
+            for key in [key for key in self._partials if key[0] == signature.signature_id]:
+                retained = [
+                    partial
+                    for partial in self._partials[key]
+                    if watermark - partial.started_at <= timedelta(seconds=signature.window_seconds)
+                ]
+                if retained:
+                    self._partials[key] = retained
+                else:
+                    self._partials.pop(key, None)
+
+    def _enforce_actor_bound(self, actor_id: str) -> None:
+        entries = [
+            (key, partial)
+            for key, partials in self._partials.items()
+            if key[1] == actor_id
+            for partial in partials
+        ]
+        if len(entries) <= self._max_active_per_actor:
+            return
+        keep = {
+            id(partial)
+            for _, partial in sorted(
+                entries, key=lambda item: item[1].started_at, reverse=True
+            )[: self._max_active_per_actor]
+        }
+        for key, partials in list(self._partials.items()):
+            if key[1] != actor_id:
+                continue
+            retained = [partial for partial in partials if id(partial) in keep]
+            if retained:
+                self._partials[key] = retained
+            else:
+                self._partials.pop(key, None)
 
     def _matches_step(
         self, signature: SequenceSignature, step: SequenceStep, event: SecurityEvent

@@ -87,3 +87,34 @@ def test_matcher_does_not_start_disabled_signatures() -> None:
     signature = _signature().model_copy(update={"enabled": False})
     matcher = FiniteStateSequenceMatcher((signature,))
     assert matcher.process(_event()) == ()
+
+
+def test_matcher_accepts_late_event_inside_allowed_lateness() -> None:
+    first = _event(at=datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc))
+    clock = _event(
+        actor_id="bob",
+        result="failure",
+        at=first.timestamp + timedelta(seconds=100),
+    )
+    late_success = _event(result="success", at=first.timestamp + timedelta(seconds=30))
+    signature = _signature().model_copy(update={"allowed_lateness_seconds": 80})
+    matcher = FiniteStateSequenceMatcher((signature,))
+
+    matcher.process(first)
+    matcher.process(clock)
+    assert len(matcher.process(late_success)) == 1
+
+
+def test_matcher_rejects_event_beyond_watermark_and_bounds_state() -> None:
+    signature = _signature().model_copy(update={"allowed_lateness_seconds": 0})
+    matcher = FiniteStateSequenceMatcher((signature,), max_active_per_actor=2)
+    base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+
+    matcher.process(_event(at=base))
+    matcher.process(_event(at=base + timedelta(seconds=1)))
+    matcher.process(_event(at=base + timedelta(seconds=2)))
+    assert matcher.active_state_count == 2
+    assert matcher.watermark == base + timedelta(seconds=2)
+
+    too_late = _event(result="success", at=base - timedelta(seconds=1))
+    assert matcher.process(too_late) == ()

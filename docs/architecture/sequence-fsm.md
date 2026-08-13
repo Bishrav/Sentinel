@@ -8,9 +8,13 @@
 - Every transition reuses the safe declarative detection rule evaluator; sequence steps cannot
   execute arbitrary expressions.
 - A partial match expires when its event-time age exceeds `window_seconds`.
+- The matcher derives a watermark from the highest observed event time minus each signature's
+  `allowed_lateness_seconds`; events older than that watermark are ignored for that signature.
+- `max_active_per_actor` bounds retained partial matches by keeping the newest states first.
 - Completed matches preserve event IDs, timestamps, step IDs, actor identity, and severity as
   explainable `SequenceMatch` evidence.
-- Event IDs are tracked for replay safety, so re-delivery does not create duplicate transitions.
+- A bounded event-ID cache provides replay protection without allowing deduplication state to grow
+  without limit.
 
-Allowed-lateness watermarks and bounded state eviction are intentionally separate concerns and
-will be added in the next streaming milestone.
+This matcher is ready for integration with a stream processor that supplies events in arbitrary
+arrival order; durable checkpoints and cross-process state remain deployment concerns.
