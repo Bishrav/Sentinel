@@ -1,9 +1,13 @@
 """Sentinel API foundation and ML scoring surface."""
 
+from time import perf_counter
+
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from sentinel_ml.baselines import BaselineRegistry
+from sentinel_ml.metrics import AnomalyMetrics
 from sentinel_ml.models import AnomalyScore, BehavioralFeatureVector, EntityBaseline
 from sentinel_ml.scoring import score_vector
 
@@ -24,6 +28,7 @@ app = FastAPI(
 )
 
 baseline_registry = BaselineRegistry()
+ml_metrics = AnomalyMetrics()
 
 
 @app.get("/health", tags=["operations"])
@@ -45,7 +50,10 @@ async def score_anomaly(request: AnomalyScoreRequest) -> AnomalyScore:
     """Score one feature vector against a supplied entity baseline."""
 
     try:
-        return score_vector(request.vector, request.baseline, threshold=request.threshold)
+        started = perf_counter()
+        result = score_vector(request.vector, request.baseline, threshold=request.threshold)
+        ml_metrics.observe(result, (perf_counter() - started) * 1000)
+        return result
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
 
@@ -65,6 +73,16 @@ async def score_registered_anomaly(
             detail=f"no baseline registered for entity: {entity_id}",
         )
     try:
-        return score_vector(vector, baseline, threshold=threshold)
+        started = perf_counter()
+        result = score_vector(vector, baseline, threshold=threshold)
+        ml_metrics.observe(result, (perf_counter() - started) * 1000)
+        return result
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+@app.get("/metrics", response_class=PlainTextResponse, tags=["operations"])
+async def metrics() -> str:
+    """Return Prometheus-compatible ML scoring metrics."""
+
+    return ml_metrics.prometheus()
