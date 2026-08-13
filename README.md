@@ -18,9 +18,11 @@ The project is part of a broader AI/backend portfolio, but Sentinel has a distin
 
 ## Project status
 
-Sentinel is currently in active implementation. The repository starts with the system contract and implementation roadmap; production claims will be added only as they are supported by tests, replayable datasets, benchmarks, and documented failure modes.
+Sentinel is currently in active implementation. Phases 0–4 are implemented in the repository; production claims are added only where supported by tests, replayable datasets, benchmarks, and documented failure modes.
 
 Phase 4 currently includes deterministic behavioral features, replay-safe entity baselines, explainable z-score scoring, Isolation Forest integration, labeled evaluation, model comparison, CLI reports, and versioned model artifacts.
+
+Phase 4 completion evidence is documented in [`docs/operations/phase-4-validation.md`](docs/operations/phase-4-validation.md).
 
 Planned evidence includes:
 
@@ -144,6 +146,7 @@ Technology choices may change as benchmarks and operational constraints provide 
 - [x] Add centrality, privilege-loop detection, and permission graph diffs
 - [x] Add entity baselines and behavioral anomaly evaluation
 - [x] Add model evaluation, comparison reports, and versioned persistence
+- [x] Integrate anomaly scores with incidents and expose ML observability metrics
 - [ ] Implement FSM/sliding-window sequence correlation
 - [ ] Add evidence-weighted risk scoring and audit records
 - [ ] Add typed investigation workflows and runbook retrieval
