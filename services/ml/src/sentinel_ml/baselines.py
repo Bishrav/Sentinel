@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from datetime import datetime, timezone
+from hashlib import sha256
+import json
+from pathlib import Path
 
-from .models import BehavioralFeatureVector, EntityBaseline
+from .models import BehavioralFeatureVector, BaselineArtifactManifest, EntityBaseline
 
 
 class _RunningFeature:
@@ -80,3 +83,60 @@ class OnlineBaselineStore:
 
         baselines = [self.get(entity_id) for entity_id in sorted(self._features)]
         return tuple(baseline for baseline in baselines if baseline is not None)
+
+
+class BaselineArtifactStore:
+    """Persist and load trusted entity baselines with checksum validation."""
+
+    def save(self, baseline: EntityBaseline, artifact_dir: str | Path) -> BaselineArtifactManifest:
+        directory = Path(artifact_dir)
+        directory.mkdir(parents=True, exist_ok=True)
+        baseline_path = directory / "baseline.json"
+        manifest_path = directory / "manifest.json"
+        baseline_path.write_text(
+            json.dumps(baseline.model_dump(mode="json"), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        manifest = BaselineArtifactManifest(
+            artifact_name=baseline_path.name,
+            artifact_sha256=sha256(baseline_path.read_bytes()).hexdigest(),
+            baseline=baseline,
+        )
+        manifest_path.write_text(
+            json.dumps(manifest.model_dump(mode="json"), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        return manifest
+
+    def load(self, artifact_dir: str | Path) -> EntityBaseline:
+        directory = Path(artifact_dir)
+        manifest = BaselineArtifactManifest.model_validate_json(
+            (directory / "manifest.json").read_text(encoding="utf-8")
+        )
+        artifact_path = directory / manifest.artifact_name
+        if sha256(artifact_path.read_bytes()).hexdigest() != manifest.artifact_sha256:
+            raise ValueError("baseline artifact checksum does not match manifest")
+        baseline = EntityBaseline.model_validate_json(artifact_path.read_text(encoding="utf-8"))
+        if baseline != manifest.baseline:
+            raise ValueError("baseline artifact does not match manifest")
+        return baseline
+
+
+class BaselineRegistry:
+    """Process-local baseline registry used by the serving layer."""
+
+    def __init__(self) -> None:
+        self._baselines: dict[str, EntityBaseline] = {}
+
+    def register(self, baseline: EntityBaseline) -> None:
+        self._baselines[baseline.entity_id] = baseline
+
+    def load(self, entity_id: str, artifact_dir: str | Path) -> EntityBaseline:
+        baseline = BaselineArtifactStore().load(artifact_dir)
+        if baseline.entity_id != entity_id:
+            raise ValueError("baseline artifact entity does not match requested entity")
+        self.register(baseline)
+        return baseline
+
+    def get(self, entity_id: str) -> EntityBaseline | None:
+        return self._baselines.get(entity_id)

@@ -90,6 +90,17 @@ class ModelArtifactManifest(BaseModel):
     schema_version: Literal["1.0"] = "1.0"
 
 
+class BaselineArtifactManifest(BaseModel):
+    """Integrity manifest for a persisted entity baseline."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    artifact_name: str = Field(min_length=1)
+    artifact_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    baseline: EntityBaseline
+    schema_version: Literal["1.0"] = "1.0"
+
+
 class EstimatorAnomalyScore(BaseModel):
     """Typed prediction from a fitted anomaly estimator."""
 

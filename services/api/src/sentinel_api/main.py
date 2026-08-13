@@ -3,6 +3,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
+from sentinel_ml.baselines import BaselineRegistry
 from sentinel_ml.models import AnomalyScore, BehavioralFeatureVector, EntityBaseline
 from sentinel_ml.scoring import score_vector
 
@@ -21,6 +22,8 @@ app = FastAPI(
     description="Security telemetry correlation and threat intelligence engine.",
     version="0.1.0",
 )
+
+baseline_registry = BaselineRegistry()
 
 
 @app.get("/health", tags=["operations"])
@@ -43,5 +46,25 @@ async def score_anomaly(request: AnomalyScoreRequest) -> AnomalyScore:
 
     try:
         return score_vector(request.vector, request.baseline, threshold=request.threshold)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+@app.post("/v1/anomaly/score/{entity_id}", response_model=AnomalyScore, tags=["anomaly"])
+async def score_registered_anomaly(
+    entity_id: str,
+    vector: BehavioralFeatureVector,
+    threshold: float = 3.0,
+) -> AnomalyScore:
+    """Score a vector against a baseline already loaded in the process registry."""
+
+    baseline = baseline_registry.get(entity_id)
+    if baseline is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"no baseline registered for entity: {entity_id}",
+        )
+    try:
+        return score_vector(vector, baseline, threshold=threshold)
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
