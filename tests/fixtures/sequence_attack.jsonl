@@ -1,0 +1,3 @@
+{"event_id":"12345678-1234-4234-8234-123456789101","timestamp":"2026-01-01T00:00:00Z","actor_id":"alice","actor_type":"user","action":"login","resource":"console","result":"failure","severity":"medium"}
+{"event_id":"12345678-1234-4234-8234-123456789102","timestamp":"2026-01-01T00:01:00Z","actor_id":"alice","actor_type":"user","action":"login","resource":"console","result":"success","severity":"medium"}
+{"event_id":"12345678-1234-4234-8234-123456789103","timestamp":"2026-01-01T00:02:00Z","actor_id":"alice","actor_type":"user","action":"role_change","resource":"admin-console","result":"success","severity":"high"}
