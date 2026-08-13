@@ -62,3 +62,29 @@ class AnomalyScore(BaseModel):
     top_contributors: tuple[str, ...] = ()
     baseline_observation_count: int = Field(ge=0)
     schema_version: Literal["1.0"] = "1.0"
+
+
+class EstimatorMetadata(BaseModel):
+    """Reproducibility metadata for a fitted anomaly estimator."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    estimator_name: Literal["isolation_forest"]
+    feature_names: tuple[str, ...] = ()
+    observation_count: int = Field(ge=0)
+    contamination: float = Field(gt=0.0, lt=0.5)
+    random_state: int
+    schema_version: Literal["1.0"] = "1.0"
+
+
+class EstimatorAnomalyScore(BaseModel):
+    """Typed prediction from a fitted anomaly estimator."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    event_id: UUID
+    entity_id: str = Field(min_length=1)
+    score: float
+    is_anomalous: bool
+    estimator: Literal["isolation_forest"]
+    metadata: EstimatorMetadata
