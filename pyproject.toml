@@ -12,6 +12,9 @@ dependencies = [
     "uvicorn[standard]>=0.34,<1.0",
 ]
 
+[project.scripts]
+sentinel-ml-evaluate = "sentinel_ml.cli:main"
+
 [dependency-groups]
 dev = [
     "httpx>=0.28,<1.0",
