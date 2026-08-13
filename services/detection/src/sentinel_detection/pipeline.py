@@ -6,6 +6,7 @@ from collections.abc import Callable, Iterable
 
 from sentinel_ingestion.models import SecurityEvent
 from sentinel_ml.models import AnomalyScore
+from sentinel_sequence.matcher import FiniteStateSequenceMatcher
 
 from .anomaly import anomaly_to_match
 from .aggregator import IncidentAggregator
@@ -21,10 +22,12 @@ class DetectionPipeline:
         engine: RuleEngine,
         aggregator: IncidentAggregator | None = None,
         anomaly_scorer: Callable[[SecurityEvent], AnomalyScore | None] | None = None,
+        sequence_matcher: FiniteStateSequenceMatcher | None = None,
     ) -> None:
         self.engine = engine
         self.aggregator = aggregator or IncidentAggregator()
         self.anomaly_scorer = anomaly_scorer
+        self.sequence_matcher = sequence_matcher
 
     def process(self, event: SecurityEvent) -> tuple[Incident, ...]:
         """Evaluate one event and return incidents changed by that event."""
@@ -36,7 +39,10 @@ class DetectionPipeline:
                 anomaly_match = anomaly_to_match(event, anomaly_score)
                 if anomaly_match is not None:
                     matches.append(anomaly_match)
-        return self.aggregator.add(event, matches)
+        changed = self.aggregator.add(event, matches)
+        if self.sequence_matcher is not None:
+            changed += self.aggregator.add_sequences(self.sequence_matcher.process(event))
+        return changed
 
     def process_many(self, events: Iterable[SecurityEvent]) -> tuple[Incident, ...]:
         """Process events in arrival order and return the final incident projection."""
