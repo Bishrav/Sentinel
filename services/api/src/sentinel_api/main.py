@@ -6,6 +6,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from sentinel_detection.aggregator import IncidentAggregator
+from sentinel_detection.models import Incident
 from sentinel_ml.baselines import BaselineRegistry
 from sentinel_ml.metrics import AnomalyMetrics
 from sentinel_ml.models import AnomalyScore, BehavioralFeatureVector, EntityBaseline
@@ -21,6 +23,13 @@ class AnomalyScoreRequest(BaseModel):
     baseline: EntityBaseline
     threshold: float = Field(default=3.0, gt=0.0)
 
+
+class IncidentCollection(BaseModel):
+    """Read-only incident projection returned by the investigation API."""
+
+    items: tuple[Incident, ...]
+    total: int = Field(ge=0)
+
 app = FastAPI(
     title="Sentinel API",
     description="Security telemetry correlation and threat intelligence engine.",
@@ -29,6 +38,7 @@ app = FastAPI(
 
 baseline_registry = BaselineRegistry()
 ml_metrics = AnomalyMetrics()
+incident_store = IncidentAggregator()
 
 
 @app.get("/health", tags=["operations"])
@@ -43,6 +53,24 @@ async def ready() -> dict[str, str]:
     """Return readiness for the current foundation milestone."""
 
     return {"status": "ready"}
+
+
+@app.get("/v1/incidents", response_model=IncidentCollection, tags=["investigation"])
+async def list_incidents() -> IncidentCollection:
+    """Return the current in-process incident projection."""
+
+    incidents = incident_store.all()
+    return IncidentCollection(items=incidents, total=len(incidents))
+
+
+@app.get("/v1/incidents/{fingerprint}", response_model=Incident, tags=["investigation"])
+async def get_incident(fingerprint: str) -> Incident:
+    """Return one incident by its deterministic investigation fingerprint."""
+
+    incident = incident_store.get(fingerprint)
+    if incident is None:
+        raise HTTPException(status_code=404, detail=f"incident not found: {fingerprint}")
+    return incident
 
 
 @app.post("/v1/anomaly/score", response_model=AnomalyScore, tags=["anomaly"])
