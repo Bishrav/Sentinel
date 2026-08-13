@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sentinel.security/schemas/behavioral-feature-vector/v1",
+  "title": "BehavioralFeatureVector",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "entity_id", "entity_type", "timestamp", "features", "schema_version"],
+  "properties": {
+    "event_id": {"type": "string", "format": "uuid"},
+    "entity_id": {"type": "string", "minLength": 1},
+    "entity_type": {"type": "string", "enum": ["user", "service_account", "api_client", "device", "unknown"]},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "features": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "number"}},
+    "schema_version": {"type": "string", "const": "1.0"}
+  }
+}
