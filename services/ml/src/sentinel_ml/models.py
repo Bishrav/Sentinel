@@ -74,6 +74,19 @@ class EstimatorMetadata(BaseModel):
     observation_count: int = Field(ge=0)
     contamination: float = Field(gt=0.0, lt=0.5)
     random_state: int
+    model_version: str = Field(min_length=1)
+    trained_at: datetime
+    schema_version: Literal["1.0"] = "1.0"
+
+
+class ModelArtifactManifest(BaseModel):
+    """Integrity manifest stored beside a serialized estimator."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    artifact_name: str = Field(min_length=1)
+    artifact_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    metadata: EstimatorMetadata
     schema_version: Literal["1.0"] = "1.0"
 
 
