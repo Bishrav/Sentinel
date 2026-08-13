@@ -113,3 +113,12 @@ class EvaluationMetrics(BaseModel):
     precision: float = Field(ge=0.0, le=1.0)
     recall: float = Field(ge=0.0, le=1.0)
     f1: float = Field(ge=0.0, le=1.0)
+
+
+class ModelComparison(BaseModel):
+    """Side-by-side evaluation metrics for candidate detectors."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    results: tuple[EvaluationMetrics, ...] = ()
+    best_by_f1: str | None = None
