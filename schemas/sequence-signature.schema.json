@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sentinel.security/schemas/sequence-signature/v1",
+  "title": "SequenceSignature",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["signature_id", "version", "name", "description", "steps", "window_seconds", "severity"],
+  "properties": {
+    "signature_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]{2,63}$"},
+    "version": {"type": "integer", "minimum": 1},
+    "name": {"type": "string", "minLength": 1},
+    "description": {"type": "string", "minLength": 1},
+    "window_seconds": {"type": "integer", "exclusiveMinimum": 0},
+    "allowed_lateness_seconds": {"type": "integer", "minimum": 0},
+    "severity": {"type": "string", "enum": ["low", "medium", "high", "critical"]},
+    "enabled": {"type": "boolean"},
+    "steps": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["step_id", "conditions"],
+        "properties": {
+          "step_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$"},
+          "conditions": {"type": "array", "minItems": 1, "items": {"type": "object"}}
+        }
+      }
+    }
+  }
+}
