@@ -10,6 +10,11 @@
 
 ## Why Sentinel
 
+Current phase: Phase 5 — sequence correlation. Completed milestones include versioned contracts,
+finite-state matching, event-time watermarks, bounded state, incident integration, and the
+investigation API. The current milestone adds validated JSON configuration and a reusable pipeline
+factory.
+
 Security teams rarely lack logs. They lack reliable context.
 
 Sentinel is being built to correlate authentication, API, database, container, and infrastructure telemetry into a coherent security narrative. It combines deterministic detection, behavioral machine learning, temporal sequence analysis, and threat-graph algorithms so that an incident is more than an alert: it includes the evidence, affected assets, reachable attack paths, and a defensible risk score.
@@ -147,7 +152,7 @@ Technology choices may change as benchmarks and operational constraints provide 
 - [x] Add entity baselines and behavioral anomaly evaluation
 - [x] Add model evaluation, comparison reports, and versioned persistence
 - [x] Integrate anomaly scores with incidents and expose ML observability metrics
-- [ ] Implement FSM/sliding-window sequence correlation
+- [~] Implement FSM/sliding-window sequence correlation
 - [ ] Add evidence-weighted risk scoring and audit records
 - [ ] Add typed investigation workflows and runbook retrieval
 - [ ] Add observability, load tests, replay guarantees, and a demonstration console

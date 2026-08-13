@@ -1,0 +1,34 @@
+[
+  {
+    "signature_id": "credential_attack",
+    "version": 1,
+    "name": "Credential attack",
+    "description": "Failed login followed by a successful login for the same actor.",
+    "steps": [
+      {
+        "step_id": "failed_login",
+        "conditions": [
+          {"field": "action", "operator": "eq", "value": "login"},
+          {"field": "result", "operator": "eq", "value": "failure"}
+        ]
+      },
+      {
+        "step_id": "successful_login",
+        "conditions": [
+          {"field": "action", "operator": "eq", "value": "login"},
+          {"field": "result", "operator": "eq", "value": "success"}
+        ]
+      },
+      {
+        "step_id": "privilege_change",
+        "conditions": [
+          {"field": "action", "operator": "in", "value": ["role_change", "grant_permission"]}
+        ]
+      }
+    ],
+    "window_seconds": 900,
+    "allowed_lateness_seconds": 30,
+    "severity": "critical",
+    "enabled": true
+  }
+]

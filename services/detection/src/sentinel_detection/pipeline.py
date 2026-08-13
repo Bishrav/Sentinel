@@ -3,14 +3,17 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
+from pathlib import Path
 
 from sentinel_ingestion.models import SecurityEvent
 from sentinel_ml.models import AnomalyScore
 from sentinel_sequence.matcher import FiniteStateSequenceMatcher
+from sentinel_sequence.loader import load_sequences
 
 from .anomaly import anomaly_to_match
 from .aggregator import IncidentAggregator
 from .engine import RuleEngine
+from .loader import load_rules
 from .models import Incident
 
 
@@ -55,3 +58,27 @@ class DetectionPipeline:
         """Return all currently aggregated incidents."""
 
         return self.aggregator.all()
+
+
+def build_pipeline(
+    rules_path: str | Path,
+    sequences_path: str | Path | None = None,
+    *,
+    aggregator: IncidentAggregator | None = None,
+    anomaly_scorer: Callable[[SecurityEvent], AnomalyScore | None] | None = None,
+    max_active_per_actor: int = 1000,
+) -> DetectionPipeline:
+    """Build a configured detection pipeline from versioned JSON definitions."""
+
+    sequence_matcher = None
+    if sequences_path is not None:
+        sequence_matcher = FiniteStateSequenceMatcher(
+            load_sequences(sequences_path),
+            max_active_per_actor=max_active_per_actor,
+        )
+    return DetectionPipeline(
+        RuleEngine(load_rules(rules_path)),
+        aggregator=aggregator,
+        anomaly_scorer=anomaly_scorer,
+        sequence_matcher=sequence_matcher,
+    )
