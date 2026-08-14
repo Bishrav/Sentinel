@@ -13,6 +13,11 @@ from sentinel_investigation.providers import (
     ProviderGroundingError,
     ProviderNotConfiguredError,
 )
+from sentinel_investigation.http_provider import (
+    HttpInvestigationProvider,
+    HttpProviderSettings,
+    ProviderRequestError,
+)
 from sentinel_investigation.workflow import InvestigationWorkflow
 
 __all__ = [
@@ -27,4 +32,7 @@ __all__ = [
     "InvestigationProvider",
     "ProviderGroundingError",
     "ProviderNotConfiguredError",
+    "HttpInvestigationProvider",
+    "HttpProviderSettings",
+    "ProviderRequestError",
 ]

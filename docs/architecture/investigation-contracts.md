@@ -23,3 +23,5 @@ The workflow now also consults `RunbookCatalog`. Matching is deterministic: a ru
 ## Provider boundary
 
 Provider mode requires an injected `InvestigationProvider`. The workflow rejects provider responses whose incident ID differs from the request or whose cited evidence was not present in the request evidence set. Until an adapter is configured, `POST /v1/investigations` returns `501` for provider mode rather than silently falling back to deterministic output.
+
+`HttpInvestigationProvider` is the first adapter. It accepts a validated endpoint and optional bearer token, sends the typed request as JSON, and parses only `InvestigationResponse` payloads. Network failures and malformed responses become explicit provider errors. The adapter is opt-in; credentials and endpoint configuration are not committed to the repository.

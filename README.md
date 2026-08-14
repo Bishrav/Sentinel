@@ -157,8 +157,9 @@ Technology choices may change as benchmarks and operational constraints provide 
 - [x] Define typed investigation contracts with citation integrity validation
 - [x] Add deterministic investigation workflow and API envelope
 - [x] Add deterministic runbook retrieval for investigation evidence
-- [~] Add provider orchestration boundary with request-evidence grounding
-- [ ] Connect a production investigation provider
+- [x] Add provider orchestration boundary with request-evidence grounding
+- [x] Add opt-in vendor-neutral HTTP provider adapter
+- [ ] Connect and operate a production investigation provider
 - [ ] Add observability, load tests, replay guarantees, and a demonstration console
 
 ## Engineering standards
