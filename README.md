@@ -168,8 +168,8 @@ Technology choices may change as benchmarks and operational constraints provide 
 
 ### Phase 6 — Productionization
 
-- [~] Add durable persistence and cross-process recovery
-- [ ] Add authenticated investigator workflows and RBAC
+- [x] Add durable persistence and cross-process recovery
+- [~] Add authenticated investigator workflows and RBAC
 - [ ] Connect and evaluate a production investigation provider
 - [ ] Add deployment health checks and shared observability
 - [ ] Harden external integrations and operational runbooks

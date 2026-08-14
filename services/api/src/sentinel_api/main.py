@@ -3,10 +3,11 @@
 import os
 from time import perf_counter
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from sentinel_api.security import ApiKeyAuthenticator, Principal
 from sentinel_detection.aggregator import IncidentAggregator
 from sentinel_detection.models import Incident
 from sentinel_investigation import (
@@ -59,6 +60,9 @@ incident_store = IncidentAggregator(
         else None
     )
 )
+authenticator = ApiKeyAuthenticator.from_environment()
+require_investigator = authenticator.require("investigator")
+require_operator = authenticator.require("operator")
 investigation_workflow = InvestigationWorkflow(
     provider=InvestigationProviderSettings.from_environment().build_provider()
 )
@@ -79,7 +83,7 @@ async def ready() -> dict[str, str]:
 
 
 @app.get("/v1/incidents", response_model=IncidentCollection, tags=["investigation"])
-async def list_incidents() -> IncidentCollection:
+async def list_incidents(_principal: Principal = Depends(require_investigator)) -> IncidentCollection:
     """Return the current in-process incident projection."""
 
     incidents = incident_store.all()
@@ -87,7 +91,10 @@ async def list_incidents() -> IncidentCollection:
 
 
 @app.get("/v1/incidents/{fingerprint}", response_model=Incident, tags=["investigation"])
-async def get_incident(fingerprint: str) -> Incident:
+async def get_incident(
+    fingerprint: str,
+    _principal: Principal = Depends(require_investigator),
+) -> Incident:
     """Return one incident by its deterministic investigation fingerprint."""
 
     incident = incident_store.get(fingerprint)
@@ -97,7 +104,11 @@ async def get_incident(fingerprint: str) -> Incident:
 
 
 @app.post("/v1/incidents/{fingerprint}/risk", response_model=Incident, tags=["investigation"])
-async def assess_incident_risk(fingerprint: str, inputs: RiskInput) -> Incident:
+async def assess_incident_risk(
+    fingerprint: str,
+    inputs: RiskInput,
+    _principal: Principal = Depends(require_operator),
+) -> Incident:
     """Calculate and attach an explainable risk audit to one incident."""
 
     incident = incident_store.get(fingerprint)
@@ -112,7 +123,10 @@ async def assess_incident_risk(fingerprint: str, inputs: RiskInput) -> Incident:
 
 
 @app.post("/v1/investigations", response_model=InvestigationResponse, tags=["investigation"])
-async def investigate(request: InvestigationRequest) -> InvestigationResponse:
+async def investigate(
+    request: InvestigationRequest,
+    _principal: Principal = Depends(require_investigator),
+) -> InvestigationResponse:
     """Prepare an evidence-grounded investigation without generating unsupported claims."""
 
     try:
