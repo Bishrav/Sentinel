@@ -1,211 +1,206 @@
-# SENTINEL
+# Sentinel
 
-### Autonomous Cybersecurity Intelligence & Threat Correlation Engine
+### Security telemetry correlation and evidence-grounded investigation
 
-> A security telemetry platform for turning noisy, multi-source events into explainable incidents, attack paths, and evidence-backed investigations.
+Sentinel is a portfolio-scale backend and AI systems project for turning noisy security telemetry into explainable incidents, attack-path signals, risk assessments, and investigation-ready evidence.
 
-[![Status: In Development](https://img.shields.io/badge/status-in%20development-orange)](#project-status)
-[![Focus: Security + AI](https://img.shields.io/badge/focus-security%20%2B%20AI-6f42c1)](#why-sentinel)
-[![Architecture: Event Driven](https://img.shields.io/badge/architecture-event--driven-0ea5e9)](#architecture)
+It demonstrates versioned contracts, deterministic correlation, behavioral anomaly detection, graph algorithms, replay safety, operational metrics, and validated investigation workflows.
 
-## Why Sentinel
+> Portfolio status: complete local engineering project. Sentinel is intentionally not presented as a hosted production service or as having real customer traffic.
 
-Current phase: Phase 6 — productionization. Phase 5 is complete: Sentinel now has sequence
-correlation, explainable risk scoring, evidence-grounded investigations, provider boundaries,
-operational metrics, replay validation, and a local demonstration console.
+## Why this project is technically interesting
 
-Security teams rarely lack logs. They lack reliable context.
+Security signals are rarely useful in isolation. A failed login, an unusual access pattern, a privilege change, and a reachable sensitive resource become meaningful only when they can be correlated without losing provenance.
 
-Sentinel is being built to correlate authentication, API, database, container, and infrastructure telemetry into a coherent security narrative. It combines deterministic detection, behavioral machine learning, temporal sequence analysis, and threat-graph algorithms so that an incident is more than an alert: it includes the evidence, affected assets, reachable attack paths, and a defensible risk score.
+Sentinel combines deterministic and statistical techniques so important results can be inspected, tested, replayed, and explained:
 
-The project is part of a broader AI/backend portfolio, but Sentinel has a distinct engineering focus: **security-aware AI systems that remain explainable, testable, and operationally observable**.
+- ordered event sequences use finite-state correlation and event-time watermarks;
+- behavioral anomalies preserve contributing feature evidence;
+- threat-graph analysis exposes reachability, weighted paths, centrality, cycles, and permission changes;
+- incident risk uses a versioned weighted formula rather than an opaque score;
+- investigation responses use typed contracts and reject unsupported citations;
+- replay and benchmark checks are part of the repository quality gates.
 
-## Project status
-
-Sentinel is currently in active implementation. Phases 0–4 are implemented in the repository; production claims are added only where supported by tests, replayable datasets, benchmarks, and documented failure modes.
-
-Phase 4 currently includes deterministic behavioral features, replay-safe entity baselines, explainable z-score scoring, Isolation Forest integration, labeled evaluation, model comparison, CLI reports, and versioned model artifacts.
-
-Phase 4 completion evidence is documented in [`docs/operations/phase-4-validation.md`](docs/operations/phase-4-validation.md).
-
-Planned evidence includes:
-
-- deterministic replay of benign traffic and controlled attack sequences;
-- precision, recall, false-positive, and timeout measurements for detection;
-- graph reachability and attack-path correctness tests;
-- throughput, latency, and Kafka-lag measurements under load;
-- model baselines, evaluation datasets, and per-entity anomaly explanations;
-- OpenTelemetry traces, Prometheus metrics, structured logs, and architecture decision records.
-
-## Core capabilities
-
-| Capability | What Sentinel will demonstrate |
-| --- | --- |
-| Telemetry ingestion | Collect and consume events from multiple security-relevant sources. |
-| Event normalization | Convert heterogeneous inputs into a versioned `SecurityEvent` contract. |
-| Detection pipeline | Combine rules, behavioral ML, and ordered sequence detection. |
-| Behavioral baselines | Model users, service accounts, API clients, and devices. |
-| Threat graph | Represent identities, privileges, services, resources, and exposure relationships. |
-| Attack-path analysis | Calculate reachability, weighted routes, choke points, cycles, and permission diffs. |
-| Incident risk | Rank incidents using evidence-weighted, explainable factors. |
-| Investigation layer | Produce typed, evidence-grounded hypotheses with event and graph references. |
-
-## Architecture
+## System architecture
 
 ```mermaid
 flowchart LR
-    A[Collectors] --> B[Kafka]
-    B --> C[Parser / Normalizer / Enricher]
-    C --> D[Detection Pipeline]
-    D --> D1[Rule Engine]
+    A[Security event sources] --> B[Collector and normalizer]
+    B --> C[Canonical SecurityEvent]
+    C --> D[Detection pipeline]
+    D --> D1[Declarative rules]
     D --> D2[Behavioral ML]
-    D --> D3[Sequence Engine]
-    D1 --> E[Incident Correlator]
+    D --> D3[Sequence correlation]
+    D1 --> E[Replay-safe incidents]
     D2 --> E
     D3 --> E
-    E --> F[Threat Graph]
-    F --> G[Attack-Path Engine]
-    F --> H[Risk Engine]
-    G --> H
-    H --> I[Incident API]
-    I --> J[Evidence-Grounded Investigator]
+    E --> F[Threat graph analysis]
+    F --> G[Evidence-weighted risk]
+    E --> G
+    G --> H[Incident API]
+    H --> I[Typed investigation workflow]
+    I --> J[Runbook recommendations]
 ```
 
-The frontend is intentionally secondary. It will expose and demonstrate the system; the primary engineering evidence lives in the schemas, services, algorithms, evaluation harnesses, and operational telemetry.
+The critical path is deterministic and dependency-light. Optional adapters provide SQLite persistence, API-key authentication, and an external investigation-provider boundary without making local development depend on hosted infrastructure.
 
-## Security event contract
+## Implemented capabilities
 
-Every source is normalized into a stable, versioned event shape:
+### Ingestion and detection
+
+- Canonical, versioned `SecurityEvent` contracts.
+- JSONL collection and deterministic replay fixtures.
+- Declarative rule conditions with safe operators.
+- Replay-safe incident aggregation and deterministic incident IDs.
+- Optional Kafka/Redpanda transport boundary through the ingestion service.
+
+### Behavioral ML
+
+- Per-entity behavioral feature extraction.
+- Replay-safe online baselines using numerically stable statistics.
+- Explainable z-score anomaly scoring.
+- Isolation Forest adapter with model persistence.
+- Evaluation, comparison, and versioned artifact workflows.
+
+### Sequence and graph intelligence
+
+- Finite-state sequence matching with sliding windows.
+- Event-time watermarks, allowed lateness, duplicate protection, and bounded state.
+- BFS/DFS reachability and weighted shortest paths.
+- Degree centrality, strongly connected components, attack-path assessment, and permission graph diffs.
+
+### Risk and investigation
+
+- Evidence-weighted risk scoring with versioned formula `1.0`.
+- Risk bands, component breakdowns, and immutable audit records.
+- Typed investigation requests and responses.
+- Citation integrity validation for every hypothesis.
+- Deterministic runbook recommendations based on evidence types.
+- Optional HTTP provider adapter with grounding checks, retries, backoff, and metrics.
+
+### Operational engineering
+
+- SQLite-backed incident persistence with WAL mode.
+- Opt-in Bearer API-key authentication and investigator/operator/admin roles.
+- `/health`, `/ready`, and Prometheus-compatible `/metrics` endpoints.
+- Unit, integration, contract, replay, benchmark, and CI quality checks.
+- Local demonstration console for investigation preparation.
+
+## Local quick start
+
+### Requirements
+
+- Python 3.12+
+- [uv](https://docs.astral.sh/uv/)
+- Docker Desktop only when running the optional local infrastructure stack
+
+### Install and validate
+
+```bash
+uv sync --dev
+uv run pytest
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy
+```
+
+### Run the API locally
+
+```bash
+uv run uvicorn sentinel_api.main:app --app-dir services/api/src --reload
+```
+
+Useful endpoints:
+
+- `http://localhost:8000/docs` - interactive OpenAPI documentation
+- `http://localhost:8000/health` - liveness check
+- `http://localhost:8000/ready` - local runtime configuration state
+- `http://localhost:8000/metrics` - ML, sequence, and provider metrics
+
+### Run the investigation demonstration
+
+```bash
+uv run sentinel-investigate-demo
+```
+
+The demo reads `tests/fixtures/investigation_evidence.json`, prepares a deterministic investigation response, and prints matching runbook recommendations. It intentionally generates no unsupported AI hypotheses.
+
+### Optional local infrastructure
+
+```bash
+docker compose -f infrastructure/docker/compose.yaml up -d
+```
+
+Stop it with:
+
+```bash
+docker compose -f infrastructure/docker/compose.yaml down
+```
+
+## Optional runtime configuration
+
+Local development works without these settings. They are documented for reproducibility and deployment experiments; no secrets are committed.
 
 ```text
-SecurityEvent
-├── event_id
-├── timestamp
-├── actor_id / actor_type
-├── source_ip
-├── device_id
-├── action / resource / result
-├── attributes{}
-├── severity
-├── source
-└── schema_version
+# Durable incident projections
+SENTINEL_INCIDENT_DB_PATH=./sentinel.db
+
+# API authentication: key:role pairs
+SENTINEL_API_KEYS=investigator-key:investigator,operator-key:operator
+
+# External investigation provider boundary
+SENTINEL_INVESTIGATION_ENDPOINT=https://provider.example/investigate
+SENTINEL_INVESTIGATION_API_KEY=<secret>
+SENTINEL_INVESTIGATION_TIMEOUT_SECONDS=10
+SENTINEL_INVESTIGATION_MAX_RETRIES=2
+SENTINEL_INVESTIGATION_BACKOFF_SECONDS=0.25
 ```
 
-Versioned schemas and idempotency keys are foundational requirements. They make ingestion replayable, correlation deterministic, and downstream changes reviewable.
+The repository provides the provider contract and adapter, but does not claim that a specific external provider is live. That decision belongs to whoever runs the system.
 
-## Detection and reasoning
+## Engineering evidence
 
-### Behavioral anomaly detection
+The project favors inspectable evidence over vanity counters:
 
-Entity baselines will use features such as login time, region, device fingerprint, endpoint frequency, request rate, response size, transferred bytes, permission usage, and failure counts. Candidate models include Isolation Forest, Local Outlier Factor, One-Class SVM, and an optional autoencoder.
+| Area | Evidence |
+| --- | --- |
+| Sequence correlation | [`sequence-fsm.md`](docs/architecture/sequence-fsm.md), replay tests, benchmark, CI smoke check |
+| Risk scoring | [`risk-scoring.md`](docs/architecture/risk-scoring.md), weighted components, audit record tests |
+| Investigation safety | [`investigation-contracts.md`](docs/architecture/investigation-contracts.md), citation validation tests |
+| Provider operations | [`investigation-provider.md`](docs/operations/investigation-provider.md), retries, metrics, replay validation |
+| Phase validation | [`phase-5-validation.md`](docs/operations/phase-5-validation.md), [`phase-6-validation.md`](docs/operations/phase-6-validation.md) |
+| Local operation | [`local-development.md`](docs/operations/local-development.md), [`demo-console.md`](docs/operations/demo-console.md) |
 
-An anomaly result must include both a score and the dimensions that contributed to it. A model is not considered complete without a baseline, evaluation dataset, latency measurement, and documented failure modes.
-
-### Sequence detection
-
-Sentinel will detect bounded, ordered patterns such as:
-
-```text
-FAILED_LOGIN* → SUCCESSFUL_LOGIN → ROLE_CHANGE
-→ SENSITIVE_RESOURCE_ACCESS → LARGE_EXPORT
-```
-
-Finite-state machines provide deterministic matching; sliding windows and event-time watermarks bound correlation; tries/automata will share work across signatures with common prefixes.
-
-### Threat graph algorithms
-
-The graph models users, credentials, devices, IPs, roles, permissions, APIs, services, containers, databases, tables, secrets, and repositories. It supports:
-
-- BFS/DFS reachability and blast-radius analysis;
-- weighted shortest paths for least-resistance attack routes;
-- centrality analysis for high-value choke points;
-- strongly connected component detection for privilege loops;
-- graph diffs that identify newly exposed assets after permission changes.
-
-### Evidence-grounded investigation
-
-The investigation layer receives only evidence selected by deterministic and ML services. Its tools will include event lookup, graph-path queries, baseline queries, rule explanations, and runbook retrieval. Responses will use typed JSON and every material statement must reference supporting event IDs or graph paths.
-
-## Planned technology map
-
-| Area | Planned technology | Role |
-| --- | --- | --- |
-| Services and APIs | Python / FastAPI | Ingestion, detection, investigation, and HTTP APIs |
-| Event transport | Kafka or Redpanda | Durable, decoupled telemetry processing |
-| Transactional data | PostgreSQL | Incidents, rules, identities, and audit records |
-| Graph data | Neo4j | Permissions, relationships, and attack paths |
-| Hot state | Redis | Entity profiles, windows, and rate-limit state |
-| Raw/archive data | S3-compatible object storage | Raw logs and model artifacts |
-| Observability | Prometheus + OpenTelemetry | Metrics, traces, and operational diagnosis |
-| Delivery | Docker + GitHub Actions | Reproducible development and quality gates |
-
-Technology choices may change as benchmarks and operational constraints provide evidence. Architecture decisions will be recorded rather than implied by implementation details.
-
-## Roadmap
-
-- [x] Define schemas, repository boundaries, and local development environment
-- [x] Build collectors, normalization, Kafka transport, and replayable fixtures
-- [x] Implement rule detection and incident aggregation
-- [x] Add threat graph ingestion, reachability, and attack-path queries
-- [x] Add centrality, privilege-loop detection, and permission graph diffs
-- [x] Add entity baselines and behavioral anomaly evaluation
-- [x] Add model evaluation, comparison reports, and versioned persistence
-- [x] Integrate anomaly scores with incidents and expose ML observability metrics
-- [x] Implement FSM/sliding-window sequence correlation
-- [x] Add evidence-weighted risk scoring and audit records
-- [x] Integrate risk assessments into incident projections
-- [x] Define typed investigation contracts with citation integrity validation
-- [x] Add deterministic investigation workflow and API envelope
-- [x] Add deterministic runbook retrieval for investigation evidence
-- [x] Add provider orchestration boundary with request-evidence grounding
-- [x] Add opt-in vendor-neutral HTTP provider adapter
-- [x] Activate provider adapter through environment configuration
-- [x] Add bounded provider retries and transient-failure handling
-- [x] Add provider observability metrics
-- [x] Add provider load and deterministic replay validation
-- [x] Define provider integration boundary; production operation is deferred to Phase 6
-- [x] Add observability, load tests, replay guarantees, and a demonstration console
-
-### Phase 6 — Productionization
-
-- [x] Add durable persistence and cross-process recovery
-- [x] Add authenticated investigator workflows and RBAC
-- [x] Support production provider integration through a typed deployment contract
-- [x] Add deployment health checks and shared observability
-- [x] Harden external integrations and operational runbooks
-
-## Engineering standards
-
-Sentinel is measured by engineering evidence, not feature count.
-
-- Health, readiness, and metrics endpoints are part of the service contract.
-- Critical paths use integration tests with real infrastructure containers where practical.
-- Deterministic code owns critical calculations; AI outputs are validated against typed schemas.
-- Correlation is idempotent and replayable.
-- Algorithm-heavy components include correctness tests, complexity notes, and reproducible benchmarks.
-- CI will include linting, type checking, unit tests, integration tests, and benchmark regression checks where applicable.
-- Logs are structured, traces are correlated, and security-sensitive actions are auditable.
+Benchmark numbers in this repository are local engineering signals only. They are not production throughput or latency claims.
 
 ## Repository layout
 
 ```text
-sentinel/
-├── services/          # ingestion, detection, graph, risk, and investigation services
-├── algorithms/        # sequence and attack-path algorithms
-├── ml/                # training, inference, and evaluation
-├── schemas/           # versioned event and API contracts
-├── infrastructure/    # Docker, deployment, and monitoring assets
-├── tests/              # unit, integration, contract, performance, and e2e tests
-├── benchmarks/        # reproducible throughput, latency, and algorithm benchmarks
-└── docs/               # architecture, ADRs, security, API, and operations documentation
+services/
+  api/             FastAPI surface, readiness, metrics, and route authorization
+  detection/       Rules, anomaly integration, sequence-to-incident aggregation
+  graph/           Threat graph models and algorithms
+  ingestion/       Collection, normalization, replay, and transport boundaries
+  investigation/   Typed workflows, runbooks, provider adapter, and demo CLI
+  ml/              Features, baselines, scoring, evaluation, and persistence
+  risk/            Explainable evidence-weighted risk engine
+  sequence/        Finite-state temporal correlation
+  storage/         SQLite incident persistence
+schemas/           Versioned JSON contracts
+tests/             Unit, contract, integration, replay, and performance tests
+benchmarks/        Reproducible local benchmark workloads
+docs/              Architecture, operations, API notes, and validation evidence
+infrastructure/    Optional Docker Compose development infrastructure
 ```
+
+## Project status and next direction
+
+Phases 0 through 6 are complete for the local portfolio implementation. Optional future extensions include a chosen external provider, a shared production database adapter, centralized secret rotation, and infrastructure-specific deployment manifests.
 
 ## Portfolio context
 
-Sentinel is the security-aware AI/backend system in a five-project portfolio alongside AEGIS, NEXUS, ATLAS, and NEBULA. Its role is deliberately different: it combines streaming systems, behavior modeling, temporal algorithms, graph reasoning, and explainable investigation into one security-focused capstone.
+Sentinel is Bishrav Shiwakoti's security-focused backend and AI systems project. It is intentionally distinct from a generic CRUD or frontend portfolio project: the emphasis is on correlation semantics, failure handling, explainability, replayability, and production-minded interfaces.
 
 ## Author
 
-Built by [Bishrav](https://github.com/Bishrav) as a personal engineering portfolio project.
-
-The repository is intentionally public so the design decisions, implementation progress, test evidence, and trade-offs can be reviewed as the system evolves.
+Built by [Bishrav Shiwakoti](https://github.com/Bishrav) as a personal engineering portfolio project.
