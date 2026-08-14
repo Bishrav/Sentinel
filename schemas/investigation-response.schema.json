@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Sentinel Investigation Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["incident_id", "summary", "hypotheses", "cited_evidence", "generated_at", "schema_version"],
+  "properties": {
+    "incident_id": {"type": "string", "format": "uuid"},
+    "summary": {"type": "string", "minLength": 1, "maxLength": 4000},
+    "hypotheses": {"type": "array", "maxItems": 20},
+    "cited_evidence": {"type": "array", "minItems": 1, "maxItems": 100},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "schema_version": {"const": "1.0"}
+  }
+}

@@ -10,7 +10,7 @@
 
 ## Why Sentinel
 
-Current phase: Phase 5 — sequence correlation. Completed milestones include versioned contracts,
+Current phase: Phase 5 — investigation foundations. Completed milestones include versioned contracts,
 finite-state matching, event-time watermarks, bounded state, incident integration, and the
 investigation API. The current milestone adds validated JSON configuration and a reusable pipeline
 factory.
@@ -154,7 +154,8 @@ Technology choices may change as benchmarks and operational constraints provide 
 - [x] Integrate anomaly scores with incidents and expose ML observability metrics
 - [~] Implement FSM/sliding-window sequence correlation
 - [ ] Add evidence-weighted risk scoring and audit records
-- [ ] Add typed investigation workflows and runbook retrieval
+- [~] Define typed investigation contracts with citation integrity validation
+- [ ] Add investigation workflows, provider orchestration, and runbook retrieval
 - [ ] Add observability, load tests, replay guarantees, and a demonstration console
 
 ## Engineering standards
