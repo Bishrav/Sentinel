@@ -40,3 +40,7 @@ jobs:
           uv run python -c
           "from benchmarks.investigation_provider_benchmark import run_benchmark; result = run_benchmark(200);
           assert result['successful_requests'] == 200 and result['requests_per_second'] > 0"
+      - name: Run investigation demo smoke check
+        run: >-
+          uv run sentinel-investigate-demo
+          --incident-id 12345678-1234-4234-8234-123456789101

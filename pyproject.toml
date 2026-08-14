@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 sentinel-ml-evaluate = "sentinel_ml.cli:main"
+sentinel-investigate-demo = "sentinel_investigation.demo:main"
 
 [dependency-groups]
 dev = [

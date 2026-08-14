@@ -1,0 +1,17 @@
+[
+  {
+    "reference_type": "event",
+    "reference_id": "event-login-failure-001",
+    "source": "sequence-fixture"
+  },
+  {
+    "reference_type": "sequence_match",
+    "reference_id": "sequence-credential-attack-001",
+    "source": "sequence-engine"
+  },
+  {
+    "reference_type": "graph_path",
+    "reference_id": "path-user-to-admin-console-001",
+    "source": "threat-graph"
+  }
+]

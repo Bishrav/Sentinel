@@ -10,10 +10,9 @@
 
 ## Why Sentinel
 
-Current phase: Phase 5 — investigation foundations. Completed milestones include versioned contracts,
-finite-state matching, event-time watermarks, bounded state, incident integration, and the
-investigation API. The current milestone adds validated JSON configuration and a reusable pipeline
-factory.
+Current phase: Phase 6 — productionization. Phase 5 is complete: Sentinel now has sequence
+correlation, explainable risk scoring, evidence-grounded investigations, provider boundaries,
+operational metrics, replay validation, and a local demonstration console.
 
 Security teams rarely lack logs. They lack reliable context.
 
@@ -152,9 +151,9 @@ Technology choices may change as benchmarks and operational constraints provide 
 - [x] Add entity baselines and behavioral anomaly evaluation
 - [x] Add model evaluation, comparison reports, and versioned persistence
 - [x] Integrate anomaly scores with incidents and expose ML observability metrics
-- [~] Implement FSM/sliding-window sequence correlation
+- [x] Implement FSM/sliding-window sequence correlation
 - [x] Add evidence-weighted risk scoring and audit records
-- [~] Integrate risk assessments into incident projections
+- [x] Integrate risk assessments into incident projections
 - [x] Define typed investigation contracts with citation integrity validation
 - [x] Add deterministic investigation workflow and API envelope
 - [x] Add deterministic runbook retrieval for investigation evidence
@@ -164,8 +163,16 @@ Technology choices may change as benchmarks and operational constraints provide 
 - [x] Add bounded provider retries and transient-failure handling
 - [x] Add provider observability metrics
 - [x] Add provider load and deterministic replay validation
-- [ ] Connect and operate a production investigation provider
-- [~] Add observability, load tests, replay guarantees, and a demonstration console
+- [x] Define provider integration boundary; production operation is deferred to Phase 6
+- [x] Add observability, load tests, replay guarantees, and a demonstration console
+
+### Phase 6 — Productionization
+
+- [ ] Add durable persistence and cross-process recovery
+- [ ] Add authenticated investigator workflows and RBAC
+- [ ] Connect and evaluate a production investigation provider
+- [ ] Add deployment health checks and shared observability
+- [ ] Harden external integrations and operational runbooks
 
 ## Engineering standards
 
