@@ -13,10 +13,13 @@ from sentinel_ml.metrics import AnomalyMetrics
 from sentinel_ml.models import AnomalyScore, BehavioralFeatureVector, EntityBaseline
 from sentinel_ml.scoring import score_vector
 from sentinel_investigation import (
+    InvestigationProviderSettings,
     InvestigationRequest,
     InvestigationResponse,
     InvestigationWorkflow,
+    ProviderGroundingError,
     ProviderNotConfiguredError,
+    ProviderRequestError,
 )
 from sentinel_sequence.metrics import default_metrics as sequence_metrics
 
@@ -46,7 +49,9 @@ app = FastAPI(
 baseline_registry = BaselineRegistry()
 ml_metrics = AnomalyMetrics()
 incident_store = IncidentAggregator()
-investigation_workflow = InvestigationWorkflow()
+investigation_workflow = InvestigationWorkflow(
+    provider=InvestigationProviderSettings.from_environment().build_provider()
+)
 
 
 @app.get("/health", tags=["operations"])
@@ -89,6 +94,8 @@ async def investigate(request: InvestigationRequest) -> InvestigationResponse:
         return investigation_workflow.investigate(request)
     except ProviderNotConfiguredError as error:
         raise HTTPException(status_code=501, detail=str(error)) from error
+    except (ProviderGroundingError, ProviderRequestError) as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error
 
 
 @app.post("/v1/anomaly/score", response_model=AnomalyScore, tags=["anomaly"])

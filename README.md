@@ -159,6 +159,7 @@ Technology choices may change as benchmarks and operational constraints provide 
 - [x] Add deterministic runbook retrieval for investigation evidence
 - [x] Add provider orchestration boundary with request-evidence grounding
 - [x] Add opt-in vendor-neutral HTTP provider adapter
+- [x] Activate provider adapter through environment configuration
 - [ ] Connect and operate a production investigation provider
 - [ ] Add observability, load tests, replay guarantees, and a demonstration console
 
