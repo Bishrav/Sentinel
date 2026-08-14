@@ -12,6 +12,11 @@ from sentinel_ml.baselines import BaselineRegistry
 from sentinel_ml.metrics import AnomalyMetrics
 from sentinel_ml.models import AnomalyScore, BehavioralFeatureVector, EntityBaseline
 from sentinel_ml.scoring import score_vector
+from sentinel_investigation import (
+    InvestigationRequest,
+    InvestigationResponse,
+    InvestigationWorkflow,
+)
 from sentinel_sequence.metrics import default_metrics as sequence_metrics
 
 
@@ -40,6 +45,7 @@ app = FastAPI(
 baseline_registry = BaselineRegistry()
 ml_metrics = AnomalyMetrics()
 incident_store = IncidentAggregator()
+investigation_workflow = InvestigationWorkflow()
 
 
 @app.get("/health", tags=["operations"])
@@ -72,6 +78,13 @@ async def get_incident(fingerprint: str) -> Incident:
     if incident is None:
         raise HTTPException(status_code=404, detail=f"incident not found: {fingerprint}")
     return incident
+
+
+@app.post("/v1/investigations", response_model=InvestigationResponse, tags=["investigation"])
+async def investigate(request: InvestigationRequest) -> InvestigationResponse:
+    """Prepare an evidence-grounded investigation without generating unsupported claims."""
+
+    return investigation_workflow.investigate(request)
 
 
 @app.post("/v1/anomaly/score", response_model=AnomalyScore, tags=["anomaly"])

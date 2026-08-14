@@ -6,10 +6,12 @@ from sentinel_investigation.models import (
     InvestigationRequest,
     InvestigationResponse,
 )
+from sentinel_investigation.workflow import InvestigationWorkflow
 
 __all__ = [
     "EvidenceReference",
     "InvestigationHypothesis",
     "InvestigationRequest",
     "InvestigationResponse",
+    "InvestigationWorkflow",
 ]

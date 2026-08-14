@@ -12,4 +12,8 @@ Sentinel investigations use typed request and response contracts so downstream m
 
 Supported evidence types are events, incidents, sequence matches, graph paths, baselines, and detection rules. The contract is versioned as `1.0` and mirrored in `schemas/investigation-response.schema.json`.
 
-This milestone defines the boundary only. Provider orchestration, runbook retrieval, and an HTTP investigation endpoint remain separate implementation milestones.
+This milestone defines the boundary and deterministic preparation path. Provider orchestration and runbook retrieval remain separate implementation milestones.
+
+## Deterministic workflow
+
+`InvestigationWorkflow` currently prepares a citation-complete response envelope from the request evidence. It summarizes the evidence types and deliberately returns no hypotheses. This keeps the public API honest while provider orchestration and runbook retrieval are still under development. The workflow is exposed through `POST /v1/investigations`.
