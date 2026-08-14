@@ -10,6 +10,7 @@ from sentinel_risk.models import RiskAuditRecord
 from sentinel_sequence.models import SequenceMatch
 
 from .models import Incident, RuleMatch, Severity
+from .persistence import IncidentStore
 
 _SEVERITY_RANK: dict[Severity, int] = {"low": 0, "medium": 1, "high": 2, "critical": 3}
 
@@ -21,8 +22,11 @@ def _max_severity(left: Severity, right: Severity) -> Severity:
 class IncidentAggregator:
     """Group rule matches by fingerprint while deduplicating event replays."""
 
-    def __init__(self) -> None:
-        self._incidents: dict[str, Incident] = {}
+    def __init__(self, store: IncidentStore | None = None) -> None:
+        self._store = store
+        self._incidents: dict[str, Incident] = {
+            incident.fingerprint: incident for incident in store.all()
+        } if store is not None else {}
         self._processed_matches: set[tuple[str, UUID]] = set()
         self._processed_sequences: set[tuple[str, int, tuple[UUID, ...]]] = set()
 
@@ -68,6 +72,7 @@ class IncidentAggregator:
                     }
                 )
             self._incidents[match.fingerprint] = incident
+            self._persist(incident)
             changed.append(incident)
         return tuple(changed)
 
@@ -123,6 +128,7 @@ class IncidentAggregator:
                     }
                 )
             self._incidents[fingerprint] = incident
+            self._persist(incident)
             changed.append(incident)
         return tuple(changed)
 
@@ -148,7 +154,12 @@ class IncidentAggregator:
             }
         )
         self._incidents[incident.fingerprint] = updated
+        self._persist(updated)
         return updated
+
+    def _persist(self, incident: Incident) -> None:
+        if self._store is not None:
+            self._store.upsert(incident)
 
     def all(self) -> tuple[Incident, ...]:
         return tuple(self._incidents.values())

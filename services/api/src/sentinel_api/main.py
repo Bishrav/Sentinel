@@ -1,5 +1,6 @@
 """Sentinel API foundation and ML scoring surface."""
 
+import os
 from time import perf_counter
 
 from fastapi import FastAPI, HTTPException
@@ -8,10 +9,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from sentinel_detection.aggregator import IncidentAggregator
 from sentinel_detection.models import Incident
-from sentinel_ml.baselines import BaselineRegistry
-from sentinel_ml.metrics import AnomalyMetrics
-from sentinel_ml.models import AnomalyScore, BehavioralFeatureVector, EntityBaseline
-from sentinel_ml.scoring import score_vector
 from sentinel_investigation import (
     InvestigationProviderSettings,
     InvestigationRequest,
@@ -22,8 +19,13 @@ from sentinel_investigation import (
     ProviderRequestError,
 )
 from sentinel_investigation.metrics import default_metrics as provider_metrics
-from sentinel_sequence.metrics import default_metrics as sequence_metrics
+from sentinel_ml.baselines import BaselineRegistry
+from sentinel_ml.metrics import AnomalyMetrics
+from sentinel_ml.models import AnomalyScore, BehavioralFeatureVector, EntityBaseline
+from sentinel_ml.scoring import score_vector
 from sentinel_risk import RiskInput, score_risk
+from sentinel_sequence.metrics import default_metrics as sequence_metrics
+from sentinel_storage import SqliteIncidentStore
 
 
 class AnomalyScoreRequest(BaseModel):
@@ -50,7 +52,13 @@ app = FastAPI(
 
 baseline_registry = BaselineRegistry()
 ml_metrics = AnomalyMetrics()
-incident_store = IncidentAggregator()
+incident_store = IncidentAggregator(
+    store=(
+        SqliteIncidentStore(path)
+        if (path := os.getenv("SENTINEL_INCIDENT_DB_PATH"))
+        else None
+    )
+)
 investigation_workflow = InvestigationWorkflow(
     provider=InvestigationProviderSettings.from_environment().build_provider()
 )
