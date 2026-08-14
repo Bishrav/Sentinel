@@ -12,6 +12,7 @@ from sentinel_investigation.models import (
     InvestigationResponse,
     RunbookRecommendation,
 )
+from sentinel_investigation.metrics import ProviderMetrics
 from sentinel_investigation.providers import (
     InvestigationProvider,
     ProviderGroundingError,
@@ -37,4 +38,5 @@ __all__ = [
     "HttpProviderSettings",
     "ProviderRequestError",
     "InvestigationProviderSettings",
+    "ProviderMetrics",
 ]

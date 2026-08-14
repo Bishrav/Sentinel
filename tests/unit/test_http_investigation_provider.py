@@ -12,6 +12,7 @@ from sentinel_investigation import (
     InvestigationRequest,
     ProviderRequestError,
 )
+from sentinel_investigation.metrics import ProviderMetrics
 
 
 def _request() -> InvestigationRequest:
@@ -117,3 +118,38 @@ def test_http_provider_retries_transient_failures_with_bounded_backoff() -> None
     assert response.summary == "Recovered provider response."
     assert attempts == 3
     assert delays == [0.25, 0.5]
+
+
+def test_http_provider_records_success_and_retry_metrics() -> None:
+    request = _request()
+    metrics = ProviderMetrics()
+    response_payload = {
+        "incident_id": str(request.incident_id),
+        "summary": "Metrics response.",
+        "hypotheses": [],
+        "cited_evidence": [
+            {"reference_type": "event", "reference_id": "event-001", "source": "fixture"}
+        ],
+        "runbooks": [],
+        "generated_at": datetime.now(UTC).isoformat(),
+        "schema_version": "1.0",
+    }
+    attempts = 0
+
+    def transport(_request, _timeout):
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            raise URLError("temporary outage")
+        return json.dumps(response_payload).encode()
+
+    HttpInvestigationProvider(
+        HttpProviderSettings(endpoint="https://provider.example.test/investigate"),
+        transport=transport,
+        sleeper=lambda _delay: None,
+        metrics=metrics,
+    ).generate(request)
+
+    assert metrics.requests == 1
+    assert metrics.successes == 1
+    assert metrics.retries == 1

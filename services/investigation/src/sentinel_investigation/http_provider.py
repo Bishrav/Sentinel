@@ -3,12 +3,14 @@
 import json
 import time
 from collections.abc import Callable
+from time import perf_counter
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field
 
 from .models import InvestigationRequest, InvestigationResponse
+from .metrics import ProviderMetrics, default_metrics
 
 
 class ProviderRequestError(RuntimeError):
@@ -43,12 +45,25 @@ class HttpInvestigationProvider:
         settings: HttpProviderSettings,
         transport: Transport = _request_bytes,
         sleeper: Callable[[float], None] = time.sleep,
+        metrics: ProviderMetrics = default_metrics,
     ) -> None:
         self._settings = settings
         self._transport = transport
         self._sleeper = sleeper
+        self._metrics = metrics
 
     def generate(self, request: InvestigationRequest) -> InvestigationResponse:
+        started = perf_counter()
+        self._metrics.observe_request()
+        try:
+            response = self._generate(request)
+        except ProviderRequestError:
+            self._metrics.observe_failure((perf_counter() - started) * 1000)
+            raise
+        self._metrics.observe_success((perf_counter() - started) * 1000)
+        return response
+
+    def _generate(self, request: InvestigationRequest) -> InvestigationResponse:
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
         if self._settings.api_key:
             headers["Authorization"] = f"Bearer {self._settings.api_key}"
@@ -81,6 +96,7 @@ class HttpInvestigationProvider:
                     f"investigation provider request failed after {attempt + 1} attempt(s): "
                     f"{last_error}"
                 ) from last_error
+            self._metrics.observe_retry()
             self._sleeper(self._settings.backoff_seconds * (2**attempt))
 
         raise AssertionError("provider retry loop exited unexpectedly")

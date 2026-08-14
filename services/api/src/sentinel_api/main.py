@@ -21,6 +21,7 @@ from sentinel_investigation import (
     ProviderNotConfiguredError,
     ProviderRequestError,
 )
+from sentinel_investigation.metrics import default_metrics as provider_metrics
 from sentinel_sequence.metrics import default_metrics as sequence_metrics
 from sentinel_risk import RiskInput, score_risk
 
@@ -154,4 +155,4 @@ async def score_registered_anomaly(
 async def metrics() -> str:
     """Return Prometheus-compatible ML scoring metrics."""
 
-    return ml_metrics.prometheus() + sequence_metrics.prometheus()
+    return ml_metrics.prometheus() + sequence_metrics.prometheus() + provider_metrics.prometheus()

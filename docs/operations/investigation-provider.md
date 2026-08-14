@@ -15,3 +15,5 @@ SENTINEL_INVESTIGATION_BACKOFF_SECONDS=0.25
 The API constructs the HTTP adapter at process startup. Provider requests use the typed investigation contract. A provider response that cites evidence outside the request boundary is rejected. Transient transport failures, HTTP 408/429, and 5xx responses receive bounded exponential-backoff retries. Malformed responses, non-retryable 4xx responses, exhausted retries, and grounding failures return HTTP `502`; an unconfigured provider request returns HTTP `501`.
 
 No endpoint or credential is stored in the repository. Configure secrets through the deployment platform’s environment/secret manager.
+
+Provider metrics are included in `/metrics`: request count, successful calls, failed calls, retry count, and average provider latency.

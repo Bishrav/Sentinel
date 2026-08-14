@@ -162,6 +162,7 @@ Technology choices may change as benchmarks and operational constraints provide 
 - [x] Add opt-in vendor-neutral HTTP provider adapter
 - [x] Activate provider adapter through environment configuration
 - [x] Add bounded provider retries and transient-failure handling
+- [x] Add provider observability metrics
 - [ ] Connect and operate a production investigation provider
 - [ ] Add observability, load tests, replay guarantees, and a demonstration console
 
