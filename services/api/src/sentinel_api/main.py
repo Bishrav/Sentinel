@@ -53,18 +53,16 @@ app = FastAPI(
 
 baseline_registry = BaselineRegistry()
 ml_metrics = AnomalyMetrics()
+incident_db_path = os.getenv("SENTINEL_INCIDENT_DB_PATH")
 incident_store = IncidentAggregator(
-    store=(
-        SqliteIncidentStore(path)
-        if (path := os.getenv("SENTINEL_INCIDENT_DB_PATH"))
-        else None
-    )
+    store=SqliteIncidentStore(incident_db_path) if incident_db_path else None
 )
+provider_settings = InvestigationProviderSettings.from_environment()
 authenticator = ApiKeyAuthenticator.from_environment()
 require_investigator = authenticator.require("investigator")
 require_operator = authenticator.require("operator")
 investigation_workflow = InvestigationWorkflow(
-    provider=InvestigationProviderSettings.from_environment().build_provider()
+    provider=provider_settings.build_provider()
 )
 
 
@@ -77,9 +75,14 @@ async def health() -> dict[str, str]:
 
 @app.get("/ready", tags=["operations"])
 async def ready() -> dict[str, str]:
-    """Return readiness for the current foundation milestone."""
+    """Return deployment configuration state without exposing secrets."""
 
-    return {"status": "ready"}
+    return {
+        "status": "ready",
+        "authentication": "enabled" if authenticator.enabled else "local-disabled",
+        "persistence": "sqlite" if incident_db_path else "in-memory",
+        "investigation_provider": "configured" if provider_settings.endpoint else "deterministic",
+    }
 
 
 @app.get("/v1/incidents", response_model=IncidentCollection, tags=["investigation"])

@@ -56,6 +56,18 @@ def test_incident_detail_returns_not_found() -> None:
     assert response.json()["detail"] == "incident not found: missing-fingerprint"
 
 
+def test_readiness_reports_local_runtime_modes() -> None:
+    response = client.get("/ready")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "ready",
+        "authentication": "local-disabled",
+        "persistence": "in-memory",
+        "investigation_provider": "deterministic",
+    }
+
+
 def test_incident_risk_endpoint_attaches_audit() -> None:
     fingerprint = _seed_incident()
     incident = incident_store.get(fingerprint)
