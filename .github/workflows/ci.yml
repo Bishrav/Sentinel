@@ -35,3 +35,8 @@ jobs:
           uv run python -c
           "from benchmarks.sequence_benchmark import run_benchmark; result = run_benchmark(200);
           assert result['completed_matches'] == 100 and result['events_per_second'] > 0"
+      - name: Run investigation provider benchmark smoke check
+        run: >-
+          uv run python -c
+          "from benchmarks.investigation_provider_benchmark import run_benchmark; result = run_benchmark(200);
+          assert result['successful_requests'] == 200 and result['requests_per_second'] > 0"
