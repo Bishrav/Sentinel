@@ -49,6 +49,16 @@ class InvestigationHypothesis(BaseModel):
     citations: tuple[str, ...] = Field(min_length=1, max_length=20)
 
 
+class RunbookRecommendation(BaseModel):
+    """A safe operational guide selected from evidence types, not model output."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    runbook_id: str = Field(pattern=r"^[a-z][a-z0-9_-]{2,63}$")
+    title: str = Field(min_length=1, max_length=160)
+    reason: str = Field(min_length=1, max_length=500)
+
+
 class InvestigationResponse(BaseModel):
     """Evidence-grounded investigation output with citation integrity checks."""
 
@@ -58,6 +68,7 @@ class InvestigationResponse(BaseModel):
     summary: str = Field(min_length=1, max_length=4_000)
     hypotheses: tuple[InvestigationHypothesis, ...] = Field(max_length=20)
     cited_evidence: tuple[EvidenceReference, ...] = Field(min_length=1, max_length=100)
+    runbooks: tuple[RunbookRecommendation, ...] = Field(default=(), max_length=20)
     generated_at: datetime
     schema_version: Literal["1.0"] = "1.0"
 

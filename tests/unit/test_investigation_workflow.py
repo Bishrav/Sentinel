@@ -30,5 +30,9 @@ def test_workflow_returns_all_input_evidence_without_unverified_hypotheses() -> 
     assert response.incident_id == request.incident_id
     assert response.cited_evidence == request.evidence
     assert response.hypotheses == ()
+    assert [item.runbook_id for item in response.runbooks] == [
+        "credential-compromise-response",
+        "graph-relationship-investigation",
+    ]
     assert "1 event" in response.summary
     assert "1 graph path" in response.summary

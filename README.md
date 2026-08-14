@@ -155,8 +155,9 @@ Technology choices may change as benchmarks and operational constraints provide 
 - [~] Implement FSM/sliding-window sequence correlation
 - [ ] Add evidence-weighted risk scoring and audit records
 - [x] Define typed investigation contracts with citation integrity validation
-- [~] Add deterministic investigation workflow and API envelope
-- [ ] Add investigation workflows, provider orchestration, and runbook retrieval
+- [x] Add deterministic investigation workflow and API envelope
+- [~] Add deterministic runbook retrieval for investigation evidence
+- [ ] Add provider orchestration for investigation workflows
 - [ ] Add observability, load tests, replay guarantees, and a demonstration console
 
 ## Engineering standards

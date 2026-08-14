@@ -4,6 +4,7 @@ from collections import Counter
 from datetime import UTC, datetime
 
 from .models import InvestigationRequest, InvestigationResponse
+from .runbooks import RunbookCatalog
 
 
 class InvestigationWorkflow:
@@ -13,6 +14,9 @@ class InvestigationWorkflow:
     deterministic workflow reports what evidence is available and leaves
     hypotheses empty rather than manufacturing conclusions.
     """
+
+    def __init__(self, runbooks: RunbookCatalog | None = None) -> None:
+        self._runbooks = runbooks or RunbookCatalog()
 
     def investigate(self, request: InvestigationRequest) -> InvestigationResponse:
         evidence_counts = Counter(item.reference_type for item in request.evidence)
@@ -30,5 +34,6 @@ class InvestigationWorkflow:
             summary=summary,
             hypotheses=(),
             cited_evidence=request.evidence,
+            runbooks=self._runbooks.recommend(request.evidence),
             generated_at=datetime.now(UTC),
         )

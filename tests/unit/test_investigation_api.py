@@ -28,3 +28,4 @@ def test_investigation_endpoint_returns_citation_complete_envelope() -> None:
     assert payload["schema_version"] == "1.0"
     assert payload["hypotheses"] == []
     assert payload["cited_evidence"][0]["reference_id"] == "incident-001"
+    assert payload["runbooks"][0]["runbook_id"] == "graph-relationship-investigation"
