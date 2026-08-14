@@ -12,4 +12,4 @@ score = severity * 0.30
       + min(evidence_count * 10, 100) * 0.05
 ```
 
-The result is bounded to 0–100 and mapped to low, medium, high, or critical bands. The current milestone defines the scoring contract and deterministic calculator. Incident projection integration and audit persistence remain separate milestones.
+The result is bounded to 0–100 and mapped to low, medium, high, or critical bands. Risk assessments can be attached to incidents through `POST /v1/incidents/{fingerprint}/risk`; the incident retains the score, band, and full audit record.

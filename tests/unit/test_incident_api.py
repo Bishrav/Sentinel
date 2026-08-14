@@ -54,3 +54,25 @@ def test_incident_detail_returns_not_found() -> None:
     response = client.get("/v1/incidents/missing-fingerprint")
     assert response.status_code == 404
     assert response.json()["detail"] == "incident not found: missing-fingerprint"
+
+
+def test_incident_risk_endpoint_attaches_audit() -> None:
+    fingerprint = _seed_incident()
+    incident = incident_store.get(fingerprint)
+    assert incident is not None
+
+    response = client.post(
+        f"/v1/incidents/{fingerprint}/risk",
+        json={
+            "incident_id": str(incident.incident_id),
+            "severity": "high",
+            "anomaly_score": 80,
+            "sequence_confidence": 0.8,
+            "graph_risk_score": 70,
+            "evidence_count": 2,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["risk_band"] == "high"
+    assert response.json()["risk_audit"]["assessment"]["formula_version"] == "1.0"

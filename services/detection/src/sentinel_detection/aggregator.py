@@ -6,6 +6,7 @@ from collections.abc import Iterable
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 from sentinel_ingestion.models import SecurityEvent
+from sentinel_risk.models import RiskAuditRecord
 from sentinel_sequence.models import SequenceMatch
 
 from .models import Incident, RuleMatch, Severity
@@ -127,6 +128,27 @@ class IncidentAggregator:
 
     def get(self, fingerprint: str) -> Incident | None:
         return self._incidents.get(fingerprint)
+
+    def apply_risk(self, audit: RiskAuditRecord) -> Incident | None:
+        """Attach a replayable risk audit to its matching incident."""
+
+        incident = next(
+            (item for item in self._incidents.values() if item.incident_id == audit.inputs.incident_id),
+            None,
+        )
+        if incident is None:
+            return None
+        if audit.assessment.incident_id != incident.incident_id:
+            raise ValueError("risk assessment incident_id does not match incident")
+        updated = incident.model_copy(
+            update={
+                "risk_score": audit.assessment.score,
+                "risk_band": audit.assessment.band,
+                "risk_audit": audit,
+            }
+        )
+        self._incidents[incident.fingerprint] = updated
+        return updated
 
     def all(self) -> tuple[Incident, ...]:
         return tuple(self._incidents.values())

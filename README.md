@@ -153,7 +153,8 @@ Technology choices may change as benchmarks and operational constraints provide 
 - [x] Add model evaluation, comparison reports, and versioned persistence
 - [x] Integrate anomaly scores with incidents and expose ML observability metrics
 - [~] Implement FSM/sliding-window sequence correlation
-- [~] Add evidence-weighted risk scoring and audit records
+- [x] Add evidence-weighted risk scoring and audit records
+- [~] Integrate risk assessments into incident projections
 - [x] Define typed investigation contracts with citation integrity validation
 - [x] Add deterministic investigation workflow and API envelope
 - [x] Add deterministic runbook retrieval for investigation evidence

@@ -22,6 +22,7 @@ from sentinel_investigation import (
     ProviderRequestError,
 )
 from sentinel_sequence.metrics import default_metrics as sequence_metrics
+from sentinel_risk import RiskInput, score_risk
 
 
 class AnomalyScoreRequest(BaseModel):
@@ -84,6 +85,21 @@ async def get_incident(fingerprint: str) -> Incident:
     if incident is None:
         raise HTTPException(status_code=404, detail=f"incident not found: {fingerprint}")
     return incident
+
+
+@app.post("/v1/incidents/{fingerprint}/risk", response_model=Incident, tags=["investigation"])
+async def assess_incident_risk(fingerprint: str, inputs: RiskInput) -> Incident:
+    """Calculate and attach an explainable risk audit to one incident."""
+
+    incident = incident_store.get(fingerprint)
+    if incident is None:
+        raise HTTPException(status_code=404, detail=f"incident not found: {fingerprint}")
+    if inputs.incident_id != incident.incident_id:
+        raise HTTPException(status_code=422, detail="risk input incident_id does not match incident")
+    assessed = incident_store.apply_risk(score_risk(inputs))
+    if assessed is None:
+        raise HTTPException(status_code=404, detail=f"incident not found: {fingerprint}")
+    return assessed
 
 
 @app.post("/v1/investigations", response_model=InvestigationResponse, tags=["investigation"])

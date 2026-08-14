@@ -5,6 +5,7 @@ from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
+from sentinel_risk.models import RiskAuditRecord, RiskBand
 
 ConditionOperator = Literal[
     "eq",
@@ -81,4 +82,7 @@ class Incident(BaseModel):
     resources: frozenset[str] = frozenset()
     match_count: int = Field(default=0, ge=0)
     evidence: tuple[dict[str, Any], ...] = ()
+    risk_score: float | None = Field(default=None, ge=0, le=100)
+    risk_band: RiskBand | None = None
+    risk_audit: RiskAuditRecord | None = None
     schema_version: Literal["1.0"] = "1.0"
