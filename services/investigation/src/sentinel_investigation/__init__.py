@@ -8,6 +8,11 @@ from sentinel_investigation.models import (
     RunbookRecommendation,
 )
 from sentinel_investigation.runbooks import Runbook, RunbookCatalog
+from sentinel_investigation.providers import (
+    InvestigationProvider,
+    ProviderGroundingError,
+    ProviderNotConfiguredError,
+)
 from sentinel_investigation.workflow import InvestigationWorkflow
 
 __all__ = [
@@ -19,4 +24,7 @@ __all__ = [
     "Runbook",
     "RunbookCatalog",
     "RunbookRecommendation",
+    "InvestigationProvider",
+    "ProviderGroundingError",
+    "ProviderNotConfiguredError",
 ]

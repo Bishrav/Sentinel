@@ -4,6 +4,11 @@ from collections import Counter
 from datetime import UTC, datetime
 
 from .models import InvestigationRequest, InvestigationResponse
+from .providers import (
+    InvestigationProvider,
+    ProviderNotConfiguredError,
+    validate_provider_response,
+)
 from .runbooks import RunbookCatalog
 
 
@@ -15,10 +20,20 @@ class InvestigationWorkflow:
     hypotheses empty rather than manufacturing conclusions.
     """
 
-    def __init__(self, runbooks: RunbookCatalog | None = None) -> None:
+    def __init__(
+        self,
+        runbooks: RunbookCatalog | None = None,
+        provider: InvestigationProvider | None = None,
+    ) -> None:
         self._runbooks = runbooks or RunbookCatalog()
+        self._provider = provider
 
     def investigate(self, request: InvestigationRequest) -> InvestigationResponse:
+        if request.mode == "provider":
+            if self._provider is None:
+                raise ProviderNotConfiguredError("no investigation provider is configured")
+            return validate_provider_response(request, self._provider.generate(request))
+
         evidence_counts = Counter(item.reference_type for item in request.evidence)
         evidence_summary = ", ".join(
             f"{count} {evidence_type.replace('_', ' ')}"

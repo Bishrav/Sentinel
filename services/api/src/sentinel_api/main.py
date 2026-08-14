@@ -16,6 +16,7 @@ from sentinel_investigation import (
     InvestigationRequest,
     InvestigationResponse,
     InvestigationWorkflow,
+    ProviderNotConfiguredError,
 )
 from sentinel_sequence.metrics import default_metrics as sequence_metrics
 
@@ -84,7 +85,10 @@ async def get_incident(fingerprint: str) -> Incident:
 async def investigate(request: InvestigationRequest) -> InvestigationResponse:
     """Prepare an evidence-grounded investigation without generating unsupported claims."""
 
-    return investigation_workflow.investigate(request)
+    try:
+        return investigation_workflow.investigate(request)
+    except ProviderNotConfiguredError as error:
+        raise HTTPException(status_code=501, detail=str(error)) from error
 
 
 @app.post("/v1/anomaly/score", response_model=AnomalyScore, tags=["anomaly"])
