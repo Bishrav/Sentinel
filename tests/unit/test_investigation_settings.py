@@ -19,9 +19,11 @@ def test_provider_settings_build_http_adapter_from_environment(monkeypatch) -> N
     )
     monkeypatch.setenv("SENTINEL_INVESTIGATION_API_KEY", "test-key")
     monkeypatch.setenv("SENTINEL_INVESTIGATION_TIMEOUT_SECONDS", "7")
+    monkeypatch.setenv("SENTINEL_INVESTIGATION_MAX_RETRIES", "1")
 
     settings = InvestigationProviderSettings.from_environment()
     provider = settings.build_provider()
 
     assert isinstance(provider, HttpInvestigationProvider)
     assert settings.timeout_seconds == 7
+    assert settings.max_retries == 1

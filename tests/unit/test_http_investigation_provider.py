@@ -1,5 +1,6 @@
 import json
 from datetime import UTC, datetime
+from urllib.error import URLError
 from uuid import uuid4
 
 import pytest
@@ -73,3 +74,46 @@ def test_http_provider_rejects_invalid_response_payload() -> None:
             HttpProviderSettings(endpoint="https://provider.example.test/investigate"),
             transport=lambda _request, _timeout: b"not-json",
         ).generate(_request())
+
+
+def test_http_provider_retries_transient_failures_with_bounded_backoff() -> None:
+    request = _request()
+    attempts = 0
+    delays: list[float] = []
+
+    def transport(_request, _timeout):
+        nonlocal attempts
+        attempts += 1
+        if attempts < 3:
+            raise URLError("temporary outage")
+        return json.dumps(
+            {
+                "incident_id": str(request.incident_id),
+                "summary": "Recovered provider response.",
+                "hypotheses": [],
+                "cited_evidence": [
+                    {
+                        "reference_type": "event",
+                        "reference_id": "event-001",
+                        "source": "fixture",
+                    }
+                ],
+                "runbooks": [],
+                "generated_at": datetime.now(UTC).isoformat(),
+                "schema_version": "1.0",
+            }
+        ).encode()
+
+    response = HttpInvestigationProvider(
+        HttpProviderSettings(
+            endpoint="https://provider.example.test/investigate",
+            max_retries=2,
+            backoff_seconds=0.25,
+        ),
+        transport=transport,
+        sleeper=delays.append,
+    ).generate(request)
+
+    assert response.summary == "Recovered provider response."
+    assert attempts == 3
+    assert delays == [0.25, 0.5]

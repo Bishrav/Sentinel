@@ -1,6 +1,7 @@
 """Vendor-neutral HTTP adapter for investigation providers."""
 
 import json
+import time
 from collections.abc import Callable
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -22,6 +23,8 @@ class HttpProviderSettings(BaseModel):
     endpoint: AnyHttpUrl
     api_key: str | None = Field(default=None, min_length=1)
     timeout_seconds: float = Field(default=10.0, gt=0, le=60)
+    max_retries: int = Field(default=2, ge=0, le=3)
+    backoff_seconds: float = Field(default=0.25, ge=0, le=5)
 
 
 Transport = Callable[[Request, float], bytes]
@@ -35,9 +38,15 @@ def _request_bytes(request: Request, timeout: float) -> bytes:
 class HttpInvestigationProvider:
     """Call a provider endpoint that returns an InvestigationResponse JSON object."""
 
-    def __init__(self, settings: HttpProviderSettings, transport: Transport = _request_bytes) -> None:
+    def __init__(
+        self,
+        settings: HttpProviderSettings,
+        transport: Transport = _request_bytes,
+        sleeper: Callable[[float], None] = time.sleep,
+    ) -> None:
         self._settings = settings
         self._transport = transport
+        self._sleeper = sleeper
 
     def generate(self, request: InvestigationRequest) -> InvestigationResponse:
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
@@ -49,10 +58,29 @@ class HttpInvestigationProvider:
             headers=headers,
             method="POST",
         )
-        try:
-            payload = json.loads(self._transport(outbound, self._settings.timeout_seconds))
-            return InvestigationResponse.model_validate(payload)
-        except (HTTPError, URLError, TimeoutError, OSError) as error:
-            raise ProviderRequestError(f"investigation provider request failed: {error}") from error
-        except (json.JSONDecodeError, TypeError, ValueError) as error:
-            raise ProviderRequestError("investigation provider returned invalid response JSON") from error
+        for attempt in range(self._settings.max_retries + 1):
+            try:
+                payload = json.loads(self._transport(outbound, self._settings.timeout_seconds))
+                return InvestigationResponse.model_validate(payload)
+            except HTTPError as error:
+                retryable = error.code == 408 or error.code == 429 or error.code >= 500
+                if not retryable:
+                    raise ProviderRequestError(
+                        f"investigation provider returned HTTP {error.code}"
+                    ) from error
+                last_error: Exception = error
+            except (URLError, TimeoutError, OSError) as error:
+                last_error = error
+            except (json.JSONDecodeError, TypeError, ValueError) as error:
+                raise ProviderRequestError(
+                    "investigation provider returned invalid response JSON"
+                ) from error
+
+            if attempt >= self._settings.max_retries:
+                raise ProviderRequestError(
+                    f"investigation provider request failed after {attempt + 1} attempt(s): "
+                    f"{last_error}"
+                ) from last_error
+            self._sleeper(self._settings.backoff_seconds * (2**attempt))
+
+        raise AssertionError("provider retry loop exited unexpectedly")
