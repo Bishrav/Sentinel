@@ -5,6 +5,7 @@ from sentinel_investigation.http_provider import (
     HttpProviderSettings,
     ProviderRequestError,
 )
+from sentinel_investigation.metrics import ProviderMetrics
 from sentinel_investigation.models import (
     EvidenceReference,
     InvestigationHypothesis,
@@ -12,7 +13,6 @@ from sentinel_investigation.models import (
     InvestigationResponse,
     RunbookRecommendation,
 )
-from sentinel_investigation.metrics import ProviderMetrics
 from sentinel_investigation.providers import (
     InvestigationProvider,
     ProviderGroundingError,

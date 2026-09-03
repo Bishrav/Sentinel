@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
@@ -7,14 +7,13 @@ from sentinel_api.main import app, incident_store
 from sentinel_detection.models import RuleMatch
 from sentinel_ingestion.models import SecurityEvent
 
-
 client = TestClient(app)
 
 
 def _seed_incident() -> str:
     event = SecurityEvent(
         event_id=uuid4(),
-        timestamp=datetime(2026, 1, 1, tzinfo=timezone.utc),
+        timestamp=datetime(2026, 1, 1, tzinfo=UTC),
         actor_id="api-user",
         actor_type="user",
         action="login",

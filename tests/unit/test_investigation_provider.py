@@ -19,7 +19,9 @@ def _request() -> InvestigationRequest:
         incident_id=uuid4(),
         question="Explain this incident.",
         mode="provider",
-        evidence=(EvidenceReference(reference_type="event", reference_id="event-001", source="fixture"),),
+        evidence=(
+            EvidenceReference(reference_type="event", reference_id="event-001", source="fixture"),
+        ),
     )
 
 
@@ -47,7 +49,11 @@ class UngroundedProvider:
             incident_id=request.incident_id,
             summary="The provider cited an unavailable event.",
             hypotheses=(),
-            cited_evidence=(EvidenceReference(reference_type="event", reference_id="outside", source="provider"),),
+            cited_evidence=(
+                EvidenceReference(
+                    reference_type="event", reference_id="outside", source="provider"
+                ),
+            ),
             generated_at=datetime.now(UTC),
         )
 

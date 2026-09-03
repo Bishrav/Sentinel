@@ -70,10 +70,7 @@ def strongly_connected_components(
         if node_id not in indices:
             visit(node_id)
 
-    components = tuple(
-        _component_result(component, edges)
-        for component in sorted(raw_components)
-    )
+    components = tuple(_component_result(component, edges) for component in sorted(raw_components))
     return StronglyConnectedComponentsResult(
         components=components,
         privilege_loops=tuple(

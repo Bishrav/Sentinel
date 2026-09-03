@@ -34,7 +34,9 @@ def test_threat_graph_snapshot_has_stable_typed_contract() -> None:
 
 def test_graph_contract_rejects_invalid_criticality_and_confidence() -> None:
     try:
-        GraphNode(node_id="database:billing", node_type="database", label="billing", criticality=101)
+        GraphNode(
+            node_id="database:billing", node_type="database", label="billing", criticality=101
+        )
     except ValueError:
         pass
     else:

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sentinel_graph.cycles import strongly_connected_components
@@ -6,7 +6,7 @@ from sentinel_graph.models import GraphEdge, GraphNode, ThreatGraphSnapshot
 
 
 def graph() -> ThreatGraphSnapshot:
-    observed_at = datetime(2026, 8, 12, tzinfo=timezone.utc)
+    observed_at = datetime(2026, 8, 12, tzinfo=UTC)
     nodes = tuple(
         GraphNode(node_id=node_id, node_type=node_type, label=node_id)
         for node_id, node_type in (

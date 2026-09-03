@@ -1,8 +1,7 @@
-from sentinel_ingestion.normalizer import normalize
-
 from sentinel_detection.aggregator import IncidentAggregator
 from sentinel_detection.engine import RuleEngine
 from sentinel_detection.loader import load_rules
+from sentinel_ingestion.normalizer import normalize
 
 
 def make_event(event_id: str, timestamp: str, **overrides: object):

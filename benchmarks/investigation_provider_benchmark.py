@@ -21,7 +21,11 @@ def run_benchmark(request_count: int = 1_000) -> dict[str, float | int]:
         incident_id=incident_id,
         question="Summarize the available evidence.",
         mode="provider",
-        evidence=(EvidenceReference(reference_type="event", reference_id="benchmark-event", source="benchmark"),),
+        evidence=(
+            EvidenceReference(
+                reference_type="event", reference_id="benchmark-event", source="benchmark"
+            ),
+        ),
     )
     response = json.dumps(
         {
@@ -29,7 +33,11 @@ def run_benchmark(request_count: int = 1_000) -> dict[str, float | int]:
             "summary": "Benchmark response.",
             "hypotheses": [],
             "cited_evidence": [
-                {"reference_type": "event", "reference_id": "benchmark-event", "source": "benchmark"}
+                {
+                    "reference_type": "event",
+                    "reference_id": "benchmark-event",
+                    "source": "benchmark",
+                }
             ],
             "runbooks": [],
             "generated_at": "2026-01-01T00:00:00Z",

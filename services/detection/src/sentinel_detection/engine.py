@@ -35,13 +35,13 @@ def _resolve(data: Mapping[str, Any], field: str) -> Any:
 def _compare(condition: RuleCondition, actual: Any) -> bool:
     expected = condition.value
     if condition.operator == "exists":
-        return (actual is not _MISSING) == bool(expected if expected is not None else True)
+        return bool((actual is not _MISSING) == bool(expected if expected is not None else True))
     if actual is _MISSING:
         return condition.operator == "neq"
     if condition.operator == "eq":
-        return actual == expected
+        return bool(actual == expected)
     if condition.operator == "neq":
-        return actual != expected
+        return bool(actual != expected)
     if condition.operator == "in":
         return (
             isinstance(expected, Collection)
@@ -66,13 +66,13 @@ def _compare(condition: RuleCondition, actual: Any) -> bool:
         )
     try:
         if condition.operator == "gt":
-            return actual > expected
+            return bool(actual > expected)
         if condition.operator == "gte":
-            return actual >= expected
+            return bool(actual >= expected)
         if condition.operator == "lt":
-            return actual < expected
+            return bool(actual < expected)
         if condition.operator == "lte":
-            return actual <= expected
+            return bool(actual <= expected)
     except TypeError:
         return False
     return False

@@ -1,9 +1,8 @@
 from fastapi.testclient import TestClient
+from tests.unit.test_anomaly_api import payload
 
 from sentinel_api.main import app, baseline_registry
-from tests.unit.test_anomaly_api import payload
 from sentinel_ml.models import EntityBaseline
-
 
 client = TestClient(app)
 

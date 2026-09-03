@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from datetime import datetime, timezone
-from hashlib import sha256
 import json
+from collections.abc import Sequence
+from datetime import UTC, datetime
+from hashlib import sha256
 from pathlib import Path
 
 from .models import (
@@ -55,7 +55,7 @@ class IsolationForestEstimator:
             contamination=self.contamination,
             random_state=self.random_state,
             model_version=self.model_version,
-            trained_at=self._trained_at or datetime.now(timezone.utc),
+            trained_at=self._trained_at or datetime.now(UTC),
         )
 
     def fit(self, vectors: Sequence[BehavioralFeatureVector]) -> EstimatorMetadata:
@@ -72,7 +72,7 @@ class IsolationForestEstimator:
         ):
             raise ValueError("all vectors must have the same feature names")
         try:
-            from sklearn.ensemble import IsolationForest
+            from sklearn.ensemble import IsolationForest  # type: ignore[import-untyped]
         except ImportError as error:
             raise RuntimeError("scikit-learn is required for IsolationForestEstimator") from error
         matrix = [[vector.features[name] for name in feature_names] for vector in vectors]
@@ -83,7 +83,7 @@ class IsolationForestEstimator:
         ).fit(matrix)
         self._feature_names = feature_names
         self._observation_count = len(vectors)
-        self._trained_at = datetime.now(timezone.utc)
+        self._trained_at = datetime.now(UTC)
         return self.metadata  # type: ignore[return-value]
 
     def save(self, artifact_dir: str | Path) -> ModelArtifactManifest:
@@ -92,7 +92,7 @@ class IsolationForestEstimator:
         if self._model is None or self.metadata is None:
             raise RuntimeError("estimator must be fitted before saving")
         try:
-            import joblib
+            import joblib  # type: ignore[import-untyped]
         except ImportError as error:
             raise RuntimeError("joblib is required for model persistence") from error
         directory = Path(artifact_dir)
@@ -113,7 +113,7 @@ class IsolationForestEstimator:
         return manifest
 
     @classmethod
-    def load(cls, artifact_dir: str | Path) -> "IsolationForestEstimator":
+    def load(cls, artifact_dir: str | Path) -> IsolationForestEstimator:
         """Restore a model after verifying its manifest checksum.
 
         Only load artifacts produced by a trusted Sentinel training pipeline;

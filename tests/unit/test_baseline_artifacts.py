@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -15,7 +15,7 @@ def baseline() -> EntityBaseline:
         feature_names=("request_rate",),
         means={"request_rate": 10.0},
         standard_deviations={"request_rate": 2.0},
-        updated_at=datetime(2026, 8, 13, 11, 0, tzinfo=timezone.utc),
+        updated_at=datetime(2026, 8, 13, 11, 0, tzinfo=UTC),
     )
 
 

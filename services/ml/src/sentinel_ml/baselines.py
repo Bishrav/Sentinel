@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-from datetime import datetime, timezone
-from hashlib import sha256
 import json
+from collections.abc import Iterable
+from datetime import datetime
+from hashlib import sha256
 from pathlib import Path
 
-from .models import BehavioralFeatureVector, BaselineArtifactManifest, EntityBaseline
+from .models import BaselineArtifactManifest, BehavioralFeatureVector, EntityBaseline
 
 
 class _RunningFeature:
@@ -28,7 +28,7 @@ class _RunningFeature:
     def standard_deviation(self) -> float:
         if self.count < 2:
             return 0.0
-        return (self.m2 / self.count) ** 0.5
+        return float((self.m2 / self.count) ** 0.5)
 
 
 class OnlineBaselineStore:

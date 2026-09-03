@@ -1,7 +1,6 @@
 from math import isclose
 
 from sentinel_ingestion.normalizer import normalize
-
 from sentinel_ml.features import extract_features
 
 

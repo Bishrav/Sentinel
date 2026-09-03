@@ -46,7 +46,9 @@ class SequenceMetrics:
         """Render sequence counters and average processing latency."""
 
         with self._lock:
-            average = self.total_latency_ms / self.events_processed if self.events_processed else 0.0
+            average = (
+                self.total_latency_ms / self.events_processed if self.events_processed else 0.0
+            )
             lines = [
                 "# TYPE sentinel_sequence_events_processed_total counter",
                 f"sentinel_sequence_events_processed_total {self.events_processed}",

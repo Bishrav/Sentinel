@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 
 from sentinel_api.main import app
 
-
 client = TestClient(app)
 
 

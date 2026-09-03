@@ -2,7 +2,7 @@
 
 import os
 
-from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field
+from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field, TypeAdapter
 
 from .http_provider import HttpInvestigationProvider, HttpProviderSettings
 
@@ -28,11 +28,11 @@ class InvestigationProviderSettings(BaseModel):
         max_retries = os.getenv("SENTINEL_INVESTIGATION_MAX_RETRIES", "2")
         backoff_seconds = os.getenv("SENTINEL_INVESTIGATION_BACKOFF_SECONDS", "0.25")
         return cls(
-            endpoint=endpoint,
+            endpoint=TypeAdapter(AnyHttpUrl).validate_python(endpoint) if endpoint else None,
             api_key=api_key,
-            timeout_seconds=timeout_seconds,
-            max_retries=max_retries,
-            backoff_seconds=backoff_seconds,
+            timeout_seconds=float(timeout_seconds),
+            max_retries=int(max_retries),
+            backoff_seconds=float(backoff_seconds),
         )
 
     def build_provider(self) -> HttpInvestigationProvider | None:

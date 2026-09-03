@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sentinel_graph.attack_paths import assess_attack_path
@@ -6,7 +6,7 @@ from sentinel_graph.models import GraphEdge, GraphNode, ThreatGraphSnapshot
 
 
 def graph() -> ThreatGraphSnapshot:
-    observed_at = datetime(2026, 8, 12, tzinfo=timezone.utc)
+    observed_at = datetime(2026, 8, 12, tzinfo=UTC)
     nodes = (
         GraphNode(node_id="user:alice", node_type="user", label="alice"),
         GraphNode(node_id="role:developer", node_type="role", label="developer"),
@@ -52,9 +52,7 @@ def test_attack_path_reports_evidence_and_score_components() -> None:
     assert result.target_criticality == 90
     assert result.privilege_edge_count == 1
     assert result.risk_score == (
-        result.criticality_component
-        + result.privilege_component
-        + result.confidence_component
+        result.criticality_component + result.privilege_component + result.confidence_component
     )
     assert result.risk_score > 70
 

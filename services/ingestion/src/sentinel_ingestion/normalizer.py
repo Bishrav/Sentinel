@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from datetime import datetime, timezone
-from typing import Any
+from datetime import UTC, datetime
+from typing import Any, cast
 from uuid import NAMESPACE_URL, UUID, uuid5
 
 from .models import ActorType, EventResult, SecurityEvent, Severity
@@ -27,10 +27,11 @@ def _actor_type(value: Any) -> ActorType:
     normalized = str(value or "unknown").strip().lower().replace("-", "_")
     aliases = {"service": "service_account", "api": "api_client"}
     candidate = aliases.get(normalized, normalized)
-    return (
+    return cast(
+        ActorType,
         candidate
         if candidate in {"user", "service_account", "api_client", "device"}
-        else "unknown"
+        else "unknown",
     )
 
 
@@ -60,7 +61,7 @@ def _timestamp(value: Any) -> datetime:
         parsed = value
     else:
         parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
-    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
 
 
 def normalize(raw: Mapping[str, Any], *, source: str) -> SecurityEvent:
@@ -70,19 +71,39 @@ def normalize(raw: Mapping[str, Any], *, source: str) -> SecurityEvent:
     making ingestion idempotent when the same record is replayed.
     """
 
-    action = str(
-        _first(raw, "action", "event_action", "operation", default="unknown")
-    ).strip().lower()
+    action = (
+        str(_first(raw, "action", "event_action", "operation", default="unknown")).strip().lower()
+    )
     result = _result(_first(raw, "result", "status", "outcome", default="unknown"))
     canonical = json.dumps({"source": source, "record": raw}, sort_keys=True, default=str)
     event_id = _first(raw, "event_id", "id", default=None)
     parsed_event_id = UUID(str(event_id)) if event_id else uuid5(NAMESPACE_URL, canonical)
 
     known_keys = {
-        "event_id", "id", "timestamp", "time", "ts", "actor_id", "user_id", "principal",
-        "actor_type", "principal_type", "source_ip", "ip", "device_id", "device",
-        "action", "event_action", "operation", "resource", "resource_id", "target",
-        "result", "status", "outcome", "severity",
+        "event_id",
+        "id",
+        "timestamp",
+        "time",
+        "ts",
+        "actor_id",
+        "user_id",
+        "principal",
+        "actor_type",
+        "principal_type",
+        "source_ip",
+        "ip",
+        "device_id",
+        "device",
+        "action",
+        "event_action",
+        "operation",
+        "resource",
+        "resource_id",
+        "target",
+        "result",
+        "status",
+        "outcome",
+        "severity",
     }
     attributes = {key: value for key, value in raw.items() if key not in known_keys}
 

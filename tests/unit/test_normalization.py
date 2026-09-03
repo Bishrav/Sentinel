@@ -1,7 +1,6 @@
 from sentinel_ingestion.enricher import enrich
 from sentinel_ingestion.normalizer import normalize
 
-
 RAW_EVENT = {
     "timestamp": "2026-08-12T12:00:00Z",
     "user_id": "user-42",

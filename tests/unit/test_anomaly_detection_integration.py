@@ -1,11 +1,11 @@
 from uuid import UUID
 
-from sentinel_detection.anomaly import anomaly_to_match
 from sentinel_detection.aggregator import IncidentAggregator
-from sentinel_detection.pipeline import DetectionPipeline
+from sentinel_detection.anomaly import anomaly_to_match
 from sentinel_detection.engine import RuleEngine
-from sentinel_ml.models import AnomalyScore, FeatureAnomaly
+from sentinel_detection.pipeline import DetectionPipeline
 from sentinel_ingestion.normalizer import normalize
+from sentinel_ml.models import AnomalyScore, FeatureAnomaly
 
 
 def event():

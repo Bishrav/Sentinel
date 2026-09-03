@@ -7,11 +7,11 @@ from pathlib import Path
 
 from sentinel_ingestion.models import SecurityEvent
 from sentinel_ml.models import AnomalyScore
-from sentinel_sequence.matcher import FiniteStateSequenceMatcher
 from sentinel_sequence.loader import load_sequences
+from sentinel_sequence.matcher import FiniteStateSequenceMatcher
 
-from .anomaly import anomaly_to_match
 from .aggregator import IncidentAggregator
+from .anomaly import anomaly_to_match
 from .engine import RuleEngine
 from .loader import load_rules
 from .models import Incident

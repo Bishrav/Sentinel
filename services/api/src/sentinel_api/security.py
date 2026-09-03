@@ -4,7 +4,7 @@ import hmac
 import os
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, cast
 
 from fastapi import HTTPException, Request, status
 
@@ -35,7 +35,7 @@ class ApiKeyAuthenticator:
                 continue
             key, role = item.split(":", 1)
             if role in {"investigator", "operator", "admin"} and key:
-                keys[key] = role
+                keys[key] = cast(Role, role)
         return cls(keys)
 
     @property
@@ -72,7 +72,9 @@ class ApiKeyAuthenticator:
         async def dependency(request: Request) -> Principal:
             principal = self.authenticate(request)
             if rank[principal.role] < rank[role]:
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient role")
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient role"
+                )
             return principal
 
         return dependency

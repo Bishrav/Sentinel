@@ -28,9 +28,7 @@ def validate_provider_response(
     if response.incident_id != request.incident_id:
         raise ProviderGroundingError("provider response incident_id does not match request")
     available_ids = {item.reference_id for item in request.evidence}
-    outside_boundary = {
-        item.reference_id for item in response.cited_evidence
-    } - available_ids
+    outside_boundary = {item.reference_id for item in response.cited_evidence} - available_ids
     if outside_boundary:
         references = ", ".join(sorted(outside_boundary))
         raise ProviderGroundingError(

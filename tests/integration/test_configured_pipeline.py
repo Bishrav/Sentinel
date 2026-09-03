@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
@@ -26,7 +26,7 @@ def test_configured_pipeline_loads_rules_and_sequences() -> None:
         root / "config/rules/default.json",
         root / "config/sequences/default.json",
     )
-    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    start = datetime(2026, 1, 1, tzinfo=UTC)
 
     pipeline.process(_event("login", "failure", start))
     pipeline.process(_event("login", "success", start + timedelta(seconds=10)))

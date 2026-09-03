@@ -5,6 +5,7 @@ from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
+
 from sentinel_risk.models import RiskAuditRecord, RiskBand
 
 ConditionOperator = Literal[

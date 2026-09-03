@@ -56,7 +56,9 @@ def main() -> None:
         help="JSON array of typed evidence references",
     )
     parser.add_argument("--incident-id", type=UUID)
-    parser.add_argument("--question", default="What evidence and operational guidance are available?")
+    parser.add_argument(
+        "--question", default="What evidence and operational guidance are available?"
+    )
     args = parser.parse_args()
     print(run_demo(args.evidence, incident_id=args.incident_id, question=args.question))
 

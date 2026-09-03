@@ -22,11 +22,9 @@ def compare_baseline(
 ) -> ModelComparison:
     """Evaluate the statistical z-score detector on labeled samples."""
 
-    predictor: Predictor = lambda vector: score_vector(
-        vector,
-        baseline,
-        threshold=threshold,
-    ).is_anomalous
+    def predictor(vector: BehavioralFeatureVector) -> bool:
+        return score_vector(vector, baseline, threshold=threshold).is_anomalous
+
     result = evaluate_predictions(samples, predictor, estimator_name="z_score_baseline")
     return ModelComparison(results=(result,), best_by_f1=result.estimator_name)
 

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from sentinel_detection.models import RuleCondition
@@ -12,7 +12,7 @@ def _event(
 ) -> SecurityEvent:
     return SecurityEvent(
         event_id=uuid4(),
-        timestamp=at or datetime(2026, 1, 1, tzinfo=timezone.utc),
+        timestamp=at or datetime(2026, 1, 1, tzinfo=UTC),
         actor_id=actor_id,
         actor_type="user",
         action="login",
@@ -90,7 +90,7 @@ def test_matcher_does_not_start_disabled_signatures() -> None:
 
 
 def test_matcher_accepts_late_event_inside_allowed_lateness() -> None:
-    first = _event(at=datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc))
+    first = _event(at=datetime(2026, 1, 1, 0, 0, 0, tzinfo=UTC))
     clock = _event(
         actor_id="bob",
         result="failure",
@@ -108,7 +108,7 @@ def test_matcher_accepts_late_event_inside_allowed_lateness() -> None:
 def test_matcher_rejects_event_beyond_watermark_and_bounds_state() -> None:
     signature = _signature().model_copy(update={"allowed_lateness_seconds": 0})
     matcher = FiniteStateSequenceMatcher((signature,), max_active_per_actor=2)
-    base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    base = datetime(2026, 1, 1, tzinfo=UTC)
 
     matcher.process(_event(at=base))
     matcher.process(_event(at=base + timedelta(seconds=1)))

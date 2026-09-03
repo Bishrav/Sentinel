@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sentinel_ml.models import BehavioralFeatureVector, EntityBaseline
@@ -10,7 +10,7 @@ def vector(value: float) -> BehavioralFeatureVector:
         event_id=UUID("12345678-1234-4234-8234-123456789099"),
         entity_id="user-42",
         entity_type="user",
-        timestamp=datetime(2026, 8, 13, 12, 0, tzinfo=timezone.utc),
+        timestamp=datetime(2026, 8, 13, 12, 0, tzinfo=UTC),
         features={"request_rate": value, "bytes_transferred": 100.0},
     )
 
@@ -23,7 +23,7 @@ def baseline(observation_count: int = 5) -> EntityBaseline:
         feature_names=("bytes_transferred", "request_rate"),
         means={"request_rate": 10.0, "bytes_transferred": 100.0},
         standard_deviations={"request_rate": 2.0, "bytes_transferred": 0.0},
-        updated_at=datetime(2026, 8, 13, 11, 0, tzinfo=timezone.utc),
+        updated_at=datetime(2026, 8, 13, 11, 0, tzinfo=UTC),
     )
 
 

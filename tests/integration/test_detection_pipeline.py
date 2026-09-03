@@ -1,12 +1,11 @@
 from pathlib import Path
 
-from sentinel_ingestion.collectors import JsonLinesCollector
-from sentinel_ingestion.enricher import enrich
-from sentinel_ingestion.normalizer import normalize
-
 from sentinel_detection.engine import RuleEngine
 from sentinel_detection.loader import load_rules
 from sentinel_detection.pipeline import DetectionPipeline
+from sentinel_ingestion.collectors import JsonLinesCollector
+from sentinel_ingestion.enricher import enrich
+from sentinel_ingestion.normalizer import normalize
 
 
 def test_fixture_ingestion_produces_incidents_end_to_end() -> None:

@@ -24,9 +24,11 @@ class IncidentAggregator:
 
     def __init__(self, store: IncidentStore | None = None) -> None:
         self._store = store
-        self._incidents: dict[str, Incident] = {
-            incident.fingerprint: incident for incident in store.all()
-        } if store is not None else {}
+        self._incidents: dict[str, Incident] = (
+            {incident.fingerprint: incident for incident in store.all()}
+            if store is not None
+            else {}
+        )
         self._processed_matches: set[tuple[str, UUID]] = set()
         self._processed_sequences: set[tuple[str, int, tuple[UUID, ...]]] = set()
 
@@ -139,7 +141,11 @@ class IncidentAggregator:
         """Attach a replayable risk audit to its matching incident."""
 
         incident = next(
-            (item for item in self._incidents.values() if item.incident_id == audit.inputs.incident_id),
+            (
+                item
+                for item in self._incidents.values()
+                if item.incident_id == audit.inputs.incident_id
+            ),
             None,
         )
         if incident is None:

@@ -1,5 +1,6 @@
-from sentinel_investigation import EvidenceReference, InvestigationRequest, InvestigationWorkflow
 from uuid import uuid4
+
+from sentinel_investigation import EvidenceReference, InvestigationRequest, InvestigationWorkflow
 
 
 def test_deterministic_investigation_replay_preserves_output_contract() -> None:
@@ -19,6 +20,4 @@ def test_deterministic_investigation_replay_preserves_output_contract() -> None:
     first = workflow.investigate(request)
     second = workflow.investigate(request)
 
-    assert first.model_dump(exclude={"generated_at"}) == second.model_dump(
-        exclude={"generated_at"}
-    )
+    assert first.model_dump(exclude={"generated_at"}) == second.model_dump(exclude={"generated_at"})

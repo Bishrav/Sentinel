@@ -3,7 +3,6 @@ from pathlib import Path
 
 from sentinel_ml.cli import main
 
-
 FIXTURE = Path("tests/fixtures/behavioral_evaluation.jsonl")
 
 

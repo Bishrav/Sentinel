@@ -26,9 +26,7 @@ _RESOURCE_NODE_TYPES = {
 
 def _resource_type(event: SecurityEvent) -> NodeType:
     candidate = str(event.attributes.get("resource_type", "service")).lower()
-    return (
-        candidate if candidate in _RESOURCE_NODE_TYPES else "service"
-    )  # type: ignore[return-value]
+    return candidate if candidate in _RESOURCE_NODE_TYPES else "service"  # type: ignore[return-value]
 
 
 def _edge_type(event: SecurityEvent) -> EdgeType | None:

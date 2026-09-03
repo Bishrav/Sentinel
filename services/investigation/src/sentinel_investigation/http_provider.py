@@ -9,8 +9,8 @@ from urllib.request import Request, urlopen
 
 from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field
 
-from .models import InvestigationRequest, InvestigationResponse
 from .metrics import ProviderMetrics, default_metrics
+from .models import InvestigationRequest, InvestigationResponse
 
 
 class ProviderRequestError(RuntimeError):
@@ -34,7 +34,7 @@ Transport = Callable[[Request, float], bytes]
 
 def _request_bytes(request: Request, timeout: float) -> bytes:
     with urlopen(request, timeout=timeout) as response:  # noqa: S310 - configured endpoint
-        return response.read()
+        return bytes(response.read())
 
 
 class HttpInvestigationProvider:

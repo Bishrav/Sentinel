@@ -2,7 +2,6 @@ from pathlib import Path
 
 from sentinel_ml.runner import load_labeled_fixture, run_fixture
 
-
 FIXTURE = Path("tests/fixtures/behavioral_evaluation.jsonl")
 
 

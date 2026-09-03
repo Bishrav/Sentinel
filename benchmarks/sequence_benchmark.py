@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from time import perf_counter
 from uuid import uuid4
 
@@ -36,7 +36,7 @@ def run_benchmark(event_count: int = 10_000) -> dict[str, float | int]:
         severity="low",
     )
     matcher = FiniteStateSequenceMatcher((signature,))
-    start_time = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    start_time = datetime(2026, 1, 1, tzinfo=UTC)
     started = perf_counter()
     completed = 0
     for index in range(event_count):

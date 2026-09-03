@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sentinel_graph.models import GraphEdge, GraphNode, ThreatGraphSnapshot
@@ -16,7 +16,7 @@ def graph() -> ThreatGraphSnapshot:
             ("secret:billing-key", "secret"),
         )
     )
-    observed_at = datetime(2026, 8, 12, tzinfo=timezone.utc)
+    observed_at = datetime(2026, 8, 12, tzinfo=UTC)
     edges = (
         GraphEdge(
             edge_id="e1",

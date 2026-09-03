@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from sentinel_detection.aggregator import IncidentAggregator
@@ -10,7 +10,7 @@ from sentinel_storage import SqliteIncidentStore
 def _incident_input() -> tuple[SecurityEvent, RuleMatch]:
     event = SecurityEvent(
         event_id=uuid4(),
-        timestamp=datetime(2026, 1, 1, tzinfo=timezone.utc),
+        timestamp=datetime(2026, 1, 1, tzinfo=UTC),
         actor_id="persistent-user",
         actor_type="user",
         action="login",

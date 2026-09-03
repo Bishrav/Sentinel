@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sentinel_ml.baselines import OnlineBaselineStore
@@ -10,20 +10,23 @@ def vector(event_id: str, value: float) -> BehavioralFeatureVector:
         event_id=UUID(event_id),
         entity_id="user-42",
         entity_type="user",
-        timestamp=datetime(2026, 8, 13, 12, 0, tzinfo=timezone.utc),
+        timestamp=datetime(2026, 8, 13, 12, 0, tzinfo=UTC),
         features={"request_rate": value, "failure_rate": value / 10},
     )
 
 
 def test_online_baseline_uses_population_statistics() -> None:
     store = OnlineBaselineStore()
-    assert store.update_many(
-        [
-            vector("12345678-1234-4234-8234-123456789012", 10),
-            vector("12345678-1234-4234-8234-123456789013", 20),
-            vector("12345678-1234-4234-8234-123456789014", 30),
-        ]
-    ) == 3
+    assert (
+        store.update_many(
+            [
+                vector("12345678-1234-4234-8234-123456789012", 10),
+                vector("12345678-1234-4234-8234-123456789013", 20),
+                vector("12345678-1234-4234-8234-123456789014", 30),
+            ]
+        )
+        == 3
+    )
 
     baseline = store.get("user-42")
 

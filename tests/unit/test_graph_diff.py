@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sentinel_graph.diff import diff_graphs
@@ -6,7 +6,7 @@ from sentinel_graph.models import GraphEdge, GraphNode, ThreatGraphSnapshot
 
 
 def snapshot(*edges: GraphEdge, include_secret: bool = True) -> ThreatGraphSnapshot:
-    observed_at = datetime(2026, 8, 12, tzinfo=timezone.utc)
+    observed_at = datetime(2026, 8, 12, tzinfo=UTC)
     nodes = [
         GraphNode(node_id="role:developer", node_type="role", label="developer"),
         GraphNode(node_id="database:billing", node_type="database", label="billing"),
@@ -22,7 +22,7 @@ def snapshot(*edges: GraphEdge, include_secret: bool = True) -> ThreatGraphSnaps
 
 
 def test_diff_flags_newly_exposed_assets() -> None:
-    observed_at = datetime(2026, 8, 12, tzinfo=timezone.utc)
+    observed_at = datetime(2026, 8, 12, tzinfo=UTC)
     before = snapshot()
     after = snapshot(
         GraphEdge(
@@ -42,7 +42,7 @@ def test_diff_flags_newly_exposed_assets() -> None:
 
 
 def test_diff_reports_removed_and_changed_relationships() -> None:
-    observed_at = datetime(2026, 8, 12, tzinfo=timezone.utc)
+    observed_at = datetime(2026, 8, 12, tzinfo=UTC)
     before_edge = GraphEdge(
         edge_id="reach-1",
         edge_type="can_reach",

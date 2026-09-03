@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import NAMESPACE_URL, uuid5
 
 from sentinel_ingestion.models import SecurityEvent
@@ -38,7 +38,7 @@ class InMemoryGraphStore:
         snapshot_id = uuid5(NAMESPACE_URL, f"sentinel:graph:{node_ids}")
         return ThreatGraphSnapshot(
             snapshot_id=snapshot_id,
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
             nodes=tuple(self._nodes[key] for key in sorted(self._nodes)),
             edges=tuple(self._edges[key] for key in sorted(self._edges)),
         )

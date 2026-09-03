@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sentinel_ml.evaluation import evaluate_predictions
@@ -11,7 +11,7 @@ def sample(event_number: int, label: bool) -> LabeledFeatureVector:
             event_id=UUID(f"12345678-1234-4234-8234-{event_number:012d}"),
             entity_id="user-42",
             entity_type="user",
-            timestamp=datetime(2026, 8, 13, 12, 0, tzinfo=timezone.utc),
+            timestamp=datetime(2026, 8, 13, 12, 0, tzinfo=UTC),
             features={"request_rate": float(event_number)},
         ),
         is_anomalous=label,

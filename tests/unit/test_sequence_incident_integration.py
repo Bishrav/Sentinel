@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from sentinel_detection.aggregator import IncidentAggregator
@@ -45,7 +45,7 @@ def _signature() -> SequenceSignature:
 
 
 def test_pipeline_projects_sequence_match_as_incident() -> None:
-    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    start = datetime(2026, 1, 1, tzinfo=UTC)
     matcher = FiniteStateSequenceMatcher((_signature(),))
     pipeline = DetectionPipeline(RuleEngine([]), sequence_matcher=matcher)
     first = _event("failure", start)
@@ -67,7 +67,7 @@ def test_pipeline_projects_sequence_match_as_incident() -> None:
 
 
 def test_sequence_incident_projection_is_replay_safe() -> None:
-    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    start = datetime(2026, 1, 1, tzinfo=UTC)
     signature = _signature()
     first = _event("failure", start)
     second = _event("success", start + timedelta(seconds=30))

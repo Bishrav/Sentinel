@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from sentinel_detection.aggregator import IncidentAggregator
@@ -11,7 +11,7 @@ def test_risk_audit_is_attached_to_matching_incident() -> None:
     aggregator = IncidentAggregator()
     event = SecurityEvent(
         event_id=uuid4(),
-        timestamp=datetime(2026, 1, 1, tzinfo=timezone.utc),
+        timestamp=datetime(2026, 1, 1, tzinfo=UTC),
         actor_id="alice",
         actor_type="user",
         action="login",

@@ -1,7 +1,6 @@
-from sentinel_ingestion.normalizer import normalize
-
 from sentinel_graph.projection import project_event
 from sentinel_graph.store import InMemoryGraphStore
+from sentinel_ingestion.normalizer import normalize
 
 
 def make_event(**overrides: object):
@@ -42,5 +41,7 @@ def test_store_is_idempotent_and_snapshot_is_sorted() -> None:
 
     assert len(snapshot.nodes) == 3
     assert len(snapshot.edges) == 1
-    assert [node.node_id for node in snapshot.nodes] == sorted(node.node_id for node in snapshot.nodes)
+    assert [node.node_id for node in snapshot.nodes] == sorted(
+        node.node_id for node in snapshot.nodes
+    )
     assert store.edge(f"event:{event.event_id}") is not None

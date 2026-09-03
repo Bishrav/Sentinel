@@ -21,9 +21,7 @@ def _request() -> InvestigationRequest:
         question="Explain this incident.",
         mode="provider",
         evidence=(
-            EvidenceReference(
-                reference_type="event", reference_id="event-001", source="fixture"
-            ),
+            EvidenceReference(reference_type="event", reference_id="event-001", source="fixture"),
         ),
     )
 

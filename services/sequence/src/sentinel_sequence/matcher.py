@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from collections import deque
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from time import perf_counter
 from uuid import UUID
@@ -12,8 +12,8 @@ from sentinel_detection.engine import RuleEngine
 from sentinel_detection.models import DetectionRule
 from sentinel_ingestion.models import SecurityEvent
 
-from .models import SequenceMatch, SequenceSignature, SequenceStep
 from .metrics import SequenceMetrics, default_metrics
+from .models import SequenceMatch, SequenceSignature, SequenceStep
 
 
 @dataclass(frozen=True)
@@ -196,9 +196,9 @@ class FiniteStateSequenceMatcher:
             return
         keep = {
             id(partial)
-            for _, partial in sorted(
-                entries, key=lambda item: item[1].started_at, reverse=True
-            )[: self._max_active_per_actor]
+            for _, partial in sorted(entries, key=lambda item: item[1].started_at, reverse=True)[
+                : self._max_active_per_actor
+            ]
         }
         for key, partials in list(self._partials.items()):
             if key[1] != actor_id:
