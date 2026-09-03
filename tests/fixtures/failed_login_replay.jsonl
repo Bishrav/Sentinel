@@ -1,0 +1,3 @@
+{"event_id":"22345678-1234-4234-8234-123456789101","timestamp":"2026-01-01T00:00:00Z","user_id":"alice","principal_type":"user","ip":"192.0.2.10","action":"login","resource":"console","result":"failure","severity":"medium"}
+{"event_id":"22345678-1234-4234-8234-123456789102","timestamp":"2026-01-01T00:01:00Z","user_id":"alice","principal_type":"user","ip":"192.0.2.10","action":"login","resource":"console","result":"success","severity":"medium"}
+{"event_id":"22345678-1234-4234-8234-123456789103","timestamp":"2026-01-01T00:02:00Z","user_id":"alice","principal_type":"user","ip":"192.0.2.10","action":"role_change","resource":"admin-console","result":"success","severity":"high"}

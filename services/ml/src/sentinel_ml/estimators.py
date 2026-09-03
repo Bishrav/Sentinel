@@ -146,7 +146,7 @@ class IsolationForestEstimator:
         """Score one vector; higher scores indicate more anomalous behavior."""
 
         if self._model is None or self.metadata is None:
-            raise RuntimeError("estimator must be fitted before scoring")
+            raise RuntimeError("required: estimator must be fitted before scoring")
         if tuple(sorted(vector.features)) != self._feature_names:
             raise ValueError("vector feature names do not match fitted estimator")
         values = [[vector.features[name] for name in self._feature_names]]

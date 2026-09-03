@@ -1,12 +1,14 @@
 """Sentinel API foundation and ML scoring surface."""
 
 import os
+from pathlib import Path
 from time import perf_counter
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 
+from sentinel_api.demo import replay_failed_login
 from sentinel_api.security import ApiKeyAuthenticator, Principal
 from sentinel_detection.aggregator import IncidentAggregator
 from sentinel_detection.models import Incident
@@ -45,6 +47,7 @@ class IncidentCollection(BaseModel):
     items: tuple[Incident, ...]
     total: int = Field(ge=0)
 
+
 app = FastAPI(
     title="Sentinel API",
     description="Security telemetry correlation and threat intelligence engine.",
@@ -61,9 +64,20 @@ provider_settings = InvestigationProviderSettings.from_environment()
 authenticator = ApiKeyAuthenticator.from_environment()
 require_investigator = authenticator.require("investigator")
 require_operator = authenticator.require("operator")
-investigation_workflow = InvestigationWorkflow(
-    provider=provider_settings.build_provider()
-)
+investigation_workflow = InvestigationWorkflow(provider=provider_settings.build_provider())
+
+
+@app.get("/v1/demo/replay/failed-login", tags=["demo"])
+async def failed_login_demo(
+    _principal: Principal = Depends(require_investigator),  # noqa: B008
+) -> dict[str, object]:
+    """Replay failed-login events through detection, risk, and investigation."""
+
+    fixture = os.getenv(
+        "SENTINEL_FAILED_LOGIN_FIXTURE",
+        str(Path(__file__).parents[4] / "tests" / "fixtures" / "failed_login_replay.jsonl"),
+    )
+    return replay_failed_login(Path(fixture))
 
 
 @app.get("/health", tags=["operations"])
@@ -86,7 +100,9 @@ async def ready() -> dict[str, str]:
 
 
 @app.get("/v1/incidents", response_model=IncidentCollection, tags=["investigation"])
-async def list_incidents(_principal: Principal = Depends(require_investigator)) -> IncidentCollection:
+async def list_incidents(
+    _principal: Principal = Depends(require_investigator),  # noqa: B008
+) -> IncidentCollection:
     """Return the current in-process incident projection."""
 
     incidents = incident_store.all()
@@ -96,7 +112,7 @@ async def list_incidents(_principal: Principal = Depends(require_investigator)) 
 @app.get("/v1/incidents/{fingerprint}", response_model=Incident, tags=["investigation"])
 async def get_incident(
     fingerprint: str,
-    _principal: Principal = Depends(require_investigator),
+    _principal: Principal = Depends(require_investigator),  # noqa: B008
 ) -> Incident:
     """Return one incident by its deterministic investigation fingerprint."""
 
@@ -110,7 +126,7 @@ async def get_incident(
 async def assess_incident_risk(
     fingerprint: str,
     inputs: RiskInput,
-    _principal: Principal = Depends(require_operator),
+    _principal: Principal = Depends(require_operator),  # noqa: B008
 ) -> Incident:
     """Calculate and attach an explainable risk audit to one incident."""
 
@@ -118,7 +134,9 @@ async def assess_incident_risk(
     if incident is None:
         raise HTTPException(status_code=404, detail=f"incident not found: {fingerprint}")
     if inputs.incident_id != incident.incident_id:
-        raise HTTPException(status_code=422, detail="risk input incident_id does not match incident")
+        raise HTTPException(
+            status_code=422, detail="risk input incident_id does not match incident"
+        )
     assessed = incident_store.apply_risk(score_risk(inputs))
     if assessed is None:
         raise HTTPException(status_code=404, detail=f"incident not found: {fingerprint}")
@@ -128,7 +146,7 @@ async def assess_incident_risk(
 @app.post("/v1/investigations", response_model=InvestigationResponse, tags=["investigation"])
 async def investigate(
     request: InvestigationRequest,
-    _principal: Principal = Depends(require_investigator),
+    _principal: Principal = Depends(require_investigator),  # noqa: B008
 ) -> InvestigationResponse:
     """Prepare an evidence-grounded investigation without generating unsupported claims."""
 

@@ -2,7 +2,7 @@
 
 ### Security telemetry correlation and evidence-grounded investigation
 
-Sentinel is a portfolio-scale backend and AI systems project for turning noisy security telemetry into explainable incidents, attack-path signals, risk assessments, and investigation-ready evidence.
+Sentinel is a portfolio backend and AI systems project for turning noisy security telemetry into explainable incidents, attack-path signals, risk assessments, and investigation-ready evidence.
 
 It demonstrates versioned contracts, deterministic correlation, behavioral anomaly detection, graph algorithms, replay safety, operational metrics, and validated investigation workflows.
 
@@ -87,6 +87,30 @@ The critical path is deterministic and dependency-light. Optional adapters provi
 - Local demonstration console for investigation preparation.
 
 ## Local quick start
+
+### Failed-login investigation demo
+
+Replay the checked-in scenario with the API running:
+
+```powershell
+uv run uvicorn sentinel_api.main:app --app-dir services/api/src
+Invoke-RestMethod http://localhost:8000/v1/demo/replay/failed-login
+```
+
+The endpoint returns normalized events, the `sequence:credential_attack:alice` incident, a versioned risk audit, and a deterministic investigation response with cited event and sequence evidence. In local development authentication is disabled by default; set `SENTINEL_API_KEYS=demo-key:investigator` and send `Authorization: Bearer demo-key` to exercise the protected route.
+
+Expected projection (abridged):
+
+```json
+{
+  "incident": {"fingerprint": "sequence:credential_attack:alice", "risk_band": "high"},
+  "risk_explanation": {"assessment": {"score": 76.5}},
+  "investigation_response": {"hypotheses": [], "schema_version": "1.0"},
+  "deterministic": true
+}
+```
+
+The failed-login sequence and risk policy are deterministic rules. Behavioral ML is an optional, explainable scoring path and is not used to manufacture an investigation hypothesis.
 
 ### Requirements
 
@@ -199,7 +223,7 @@ Phases 0 through 6 are complete for the local portfolio implementation. Optional
 
 ## Portfolio context
 
-Sentinel is Bishrav Shiwakoti's security-focused backend and AI systems project. It is intentionally distinct from a generic CRUD or frontend portfolio project: the emphasis is on correlation semantics, failure handling, explainability, replayability, and production-minded interfaces.
+Sentinel is Bishrav Shiwakoti's security-focused backend and AI systems project. It is intentionally distinct from a generic CRUD or frontend portfolio project: the emphasis is on correlation semantics, failure handling, explainability, replayability, and deployment-conscious interfaces.
 
 ## Author
 
